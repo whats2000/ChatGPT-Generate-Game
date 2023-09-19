@@ -451,28 +451,33 @@
                 responseClass = "pink-text"; // Set response color to pink
             }
         } else if (command.startsWith("drop item ")) {
-            const parts = command.split(" ");
-            if (parts.length === 3) {
-                const itemIndex = parseInt(parts[2]) - 1;
-                if (!isNaN(itemIndex) && itemIndex >= 0 && itemIndex < collectedObjects.length) {
-                    const droppedItem = collectedObjects.splice(itemIndex, 1)[0];
-                    response = `You drop the ${droppedItem} in the ${currentBuilding}.`;
-                    // Find the building in the current location and add the dropped item back to its items
-                    const currentLocationData = locations[currentLocation];
-                    const buildingToDropItem = currentLocationData.buildings.find(building => building.name === currentBuilding);
-                    if (buildingToDropItem) {
-                        if (!buildingToDropItem.items) {
-                            buildingToDropItem.items = [];
+            if (currentBuilding !== "") {
+                const parts = command.split(" ");
+                if (parts.length === 3) {
+                    const itemIndex = parseInt(parts[2]) - 1;
+                    if (!isNaN(itemIndex) && itemIndex >= 0 && itemIndex < collectedObjects.length) {
+                        const droppedItem = collectedObjects.splice(itemIndex, 1)[0];
+                        response = `You drop the ${droppedItem} in the ${currentBuilding}.`;
+                        // Find the building in the current location and add the dropped item back to its items
+                        const currentLocationData = locations[currentLocation];
+                        const buildingToDropItem = currentLocationData.buildings.find(building => building.name === currentBuilding);
+                        if (buildingToDropItem) {
+                            if (!buildingToDropItem.items) {
+                                buildingToDropItem.items = [];
+                            }
+                            buildingToDropItem.items.push(droppedItem);
                         }
-                        buildingToDropItem.items.push(droppedItem);
+                        responseClass = "blue-text"; // Set response color to light blue
+                    } else {
+                        response = "Invalid item number. Type 'inventory' to see your items and their numbers.";
+                        responseClass = "pink-text"; // Set response color to pink
                     }
-                    responseClass = "pink-text"; // Set response color to light blue
                 } else {
-                    response = "Invalid item number. Type 'inventory' to see your items and their numbers.";
+                    response = "Invalid command. Type 'inventory' to see your items and their numbers.";
                     responseClass = "pink-text"; // Set response color to pink
                 }
             } else {
-                response = "Invalid command. Type 'inventory' to see your items and their numbers.";
+                response = "You need to explore a building before you can drop items.";
                 responseClass = "pink-text"; // Set response color to pink
             }
         } else if (command === "move") {
