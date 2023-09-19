@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Adventure Game</title>
+    <style>
+        /* Style for the container that holds both input and output */
+        .container {
+            height: 100vh; /* Set container height to full viewport height */
+            width: 100vw;
+            background-color: #333; /* Dark background color */
+            color: #fff; /* Light text color */
+        }
+
+        /* Style for the text container */
+        .text-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: calc(100% - 150px);
+            overflow-y: scroll;
+            background-color: #222;
+            color: #fff;
+            padding-left: 100px;
+            padding-top: 50px;
+        }
+
+        /* Style for the text area input */
+        textarea {
+            width: 100vw;
+            height: 100px;
+            box-sizing: border-box;
+            position: fixed;
+            bottom: 0; /* Fix the textarea at the bottom */
+            left: 0;
+            resize: none; /* Disable textarea resizing */
+            background-color: #444; /* Darker background color for input */
+            color: #fff; /* Light text color for input */
+        }
+
+        /* CSS classes for different instruction colors */
+        .blue-text {
+            color: #3498db;
+        }
+
+        /* Light blue */
+        .green-text {
+            color: #2ecc71;
+        }
+
+        /* Light green */
+        .red-text {
+            color: #e74c3c;
+        }
+
+        /* Light red */
+        .purple-text {
+            color: #9b59b6;
+        }
+
+        /* Light purple */
+        .yellow-text {
+            color: yellow;
+        }
+
+        /* Light yellow */
+        .pink-text {
+            color: pink;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="text-container" id="output">
+        <h1>Welcome to the Text Adventure Game!</h1>
+        <p><span class="blue-text">- Type 'look around'</span> to see your current location.</p>
+        <p><span class="green-text">- Type 'collect'</span> to collect objects at your current location.</p>
+        <p><span class="red-text">- Type 'inventory'</span> to see the objects you have collected.</p>
+        <p><span class="pink-text">- Type 'look item [index]'</span> to see the item you have collected.</p>
+        <p><span class="pink-text">- Type 'drop item [index]'</span> to drop the item you have collected.</p>
+        <p><span class="purple-text">- Type 'move'</span> to move to the next location.</p>
+        <p><span class="yellow-text">- Type 'explore'</span> to explore the building.</p>
+        <p>Have fun exploring!</p>
+    </div>
+    <label for="input-text"></label><textarea id="input-text" rows="4"
+                                              placeholder="Enter your commands here"></textarea>
+</div>
+
+<script>
+    const outputDiv = document.getElementById("output");
+    const inputText = document.getElementById("input-text");
+
+    // Game variables
+    let currentLocation = 0;
+    let currentBuilding = "";
+
+    const locations = [
+        {
+            name: "Forest",
+            description: "You find yourself in a dense forest with tall trees and chirping birds.",
+            buildings: [
+                {
+                    name: "Treehouse",
+                    description: "A cozy treehouse perched high in the branches of an ancient oak tree.",
+                    items: ["Golden Key", "Health Potion"],
+                },
+                {
+                    name: "Cabin",
+                    description: "A rustic log cabin with a welcoming fireplace and comfortable furnishings.",
+                    items: ["Wooden Sword", "Old Map"],
+                },
+                {
+                    name: "Clearing",
+                    description: "A tranquil clearing bathed in dappled sunlight, surrounded by wildflowers.",
+                    items: ["Wildflower Bouquet", "Bird's Feather"],
+                },
+            ]
+        },
+        {
+            name: "Cave",
+            description: "You enter a dark cave, and the sound of dripping water echoes.",
+            buildings: [
+                {
+                    name: "Glowing Tunnel",
+                    description: "A mysterious glowing tunnel leading deeper into the cave.",
+                    items: ["Crystal Shard", "Glowing Mushroom"],
+                },
+                {
+                    name: "Hidden Chamber",
+                    description: "A hidden chamber with ancient markings on the walls and a faint glow.",
+                    items: ["Ancient Scroll", "Enchanted Amulet"],
+                },
+                {
+                    name: "Crystal Labyrinth",
+                    description: "A labyrinth made of beautiful glowing crystals, reflecting light in all directions.",
+                    items: ["Crystal Prism", "Labyrinth Map"],
+                },
+            ]
+        },
+        {
+            name: "Castle",
+            description: "You stand before a grand castle with towering walls and a drawbridge.",
+            buildings: [
+                {
+                    name: "Royal Ballroom",
+                    description: "A majestic ballroom with chandeliers and elegant decor, frozen in time.",
+                    items: ["Royal Crown", "Ornate Key"],
+                },
+                {
+                    name: "Tower of Secrets",
+                    description: "A tower filled with dusty tomes and hidden scrolls containing long-lost knowledge.",
+                    items: ["Ancient Tome", "Secret Scroll"],
+                },
+                {
+                    name: "Castle Gardens",
+                    description: "Lush gardens with colorful flowers and fountains, now overgrown and enchanted.",
+                    items: ["Enchanted Rose", "Garden Statue"],
+                },
+            ]
+        },
+        {
+            name: "Village",
+            description: "You arrive in a peaceful village with quaint cottages and friendly villagers.",
+            buildings: [
+                {
+                    name: "Blacksmith's Forge",
+                    description: "A blacksmith's forge with an anvil and various metalworking tools.",
+                    items: ["Forged Sword", "Iron Shield"],
+                },
+                {
+                    name: "Tavern",
+                    description: "A lively tavern with a roaring fireplace and patrons sharing tales and laughter.",
+                    items: ["Mug of Ale", "Tavern Songbook"],
+                },
+                {
+                    name: "Marketplace",
+                    description: "A bustling marketplace filled with vendors selling goods of all kinds.",
+                    items: ["Market Goods", "Merchant's Map"],
+                },
+            ]
+        },
+        {
+            name: "River",
+            description: "You follow the river's flow, and the sound of rushing water surrounds you.",
+            buildings: [
+                {
+                    name: "Fisherman's Hut",
+                    description: "A small hut by the river where a fisherman stores his catch.",
+                    items: ["Fisherman's Net", "River Fish"],
+                },
+                {
+                    name: "Riverside Camp",
+                    description: "A campsite with a crackling campfire and a view of the flowing river.",
+                    items: ["Campfire Supplies", "Fishing Rod"],
+                },
+                {
+                    name: "Waterfall Viewpoint",
+                    description: "A rocky ledge overlooking a majestic waterfall, a sight to behold.",
+                    items: ["Waterfall Spray", "Nature's Beauty"],
+                },
+            ]
+        },
+        {
+            name: "Mountain",
+            description: "You ascend a towering mountain, and the air grows thinner with each step.",
+            buildings: [
+                {
+                    name: "Mountain Peak",
+                    description: "The highest point of the mountain, offering breathtaking panoramic views.",
+                    items: ["Mountain Crystal", "Eagle Feather"],
+                },
+                {
+                    name: "Cave Entrance",
+                    description: "An entrance to a mysterious cave that beckons with darkness and echoes.",
+                    items: ["Cave Map", "Luminous Fungus"],
+                },
+                {
+                    name: "Monastery",
+                    description: "A serene monastery where monks meditate and practice ancient arts.",
+                    items: ["Monk's Robe", "Enlightened Scroll"],
+                },
+            ]
+        },
+        {
+            name: "Desert",
+            description: "You find yourself in a vast desert with endless dunes and scorching heat.",
+            buildings: [
+                {
+                    name: "Oasis",
+                    description: "A hidden oasis with palm trees, cool water, and relief from the relentless sun.",
+                    items: ["Oasis Water", "Palm Leaf Fan"],
+                },
+                {
+                    name: "Sand Dune Camp",
+                    description: "A campsite nestled among sand dunes, protected from the desert winds.",
+                    items: ["Campfire Supplies", "Desert Flower"],
+                },
+                {
+                    name: "Ancient Ruins",
+                    description: "Ruined structures from a bygone era, half-buried in the shifting sands.",
+                    items: ["Ancient Relic", "Dusty Parchment"],
+                },
+            ]
+        },
+        {
+            name: "Beach",
+            description: "You arrive at a beautiful sandy beach with crystal-clear waters and gentle waves.",
+            buildings: [
+                {
+                    name: "Beach Bar",
+                    description: "A beach side bar serving refreshing drinks with a view of the sea.",
+                    items: ["Tropical Cocktail", "Seashell Necklace"],
+                },
+                {
+                    name: "Beach Hut",
+                    description: "A cozy beach hut with beach chairs and umbrellas for relaxation.",
+                    items: ["Beach Towel", "Sunscreen"],
+                },
+                {
+                    name: "Shipwreck",
+                    description: "The remains of a shipwreck washed ashore, a reminder of the sea's power.",
+                    items: ["Shipwreck Debris", "Treasure Map"],
+                },
+            ]
+        },
+        {
+            name: "Haunted House",
+            description: "You enter a spooky haunted house, and eerie whispers fill the air.",
+            buildings: [
+                {
+                    name: "Haunted Bedroom",
+                    description: "A bedroom filled with ghostly apparitions and creaking floorboards.",
+                    items: ["Ghostly Apparition", "Creaky Floorboard"],
+                },
+                {
+                    name: "Dusty Library",
+                    description: "A library filled with dusty old books and the faint scent of ancient pages.",
+                    items: ["Dusty Tome", "Ancient Scroll"],
+                },
+                {
+                    name: "Creepy Basement",
+                    description: "A dark and ominous basement with chilling drafts and secrets hidden in shadows.",
+                    items: ["Chilling Draft", "Hidden Secrets"],
+                },
+            ]
+        },
+        {
+            name: "Meadow",
+            description: "You find yourself in a peaceful meadow with colorful flowers and buzzing insects.",
+            buildings: [
+                {
+                    name: "Picnic Area",
+                    description: "A designated picnic area with wooden tables and a gentle breeze.",
+                    items: ["Picnic Basket", "Floral Blanket"],
+                },
+                {
+                    name: "Gazebo",
+                    description: "A picturesque gazebo in the middle of the meadow, perfect for contemplation.",
+                    items: ["Gazebo Bench", "Tranquil View"],
+                },
+                {
+                    name: "Butterfly Garden",
+                    description: "A garden filled with blooming flowers and butterflies fluttering about.",
+                    items: ["Butterfly Net", "Colorful Butterfly"],
+                },
+            ]
+        },
+    ];
+
+    const itemDescriptions = {
+        "Golden Key": "A shimmering key with intricate engravings. Its purpose remains a mystery.",
+        "Health Potion": "A potion filled with a vibrant red liquid. It radiates healing energy.",
+        "Wooden Sword": "A sturdy wooden sword with a simple hilt. It looks like it could be useful in a fight.",
+        "Old Map": "A weathered map with faded ink markings. It might lead to hidden treasures.",
+        "Wildflower Bouquet": "A charming bouquet of wildflowers. It emits a pleasant fragrance.",
+        "Bird's Feather": "A delicate feather from a colorful bird. It's surprisingly lightweight.",
+        "Crystal Shard": "A shard of a crystal that emits a soft, enchanting glow. It's mesmerizing to look at.",
+        "Glowing Mushroom": "A mushroom that glows softly in the dark. It could light your way in the depths.",
+        "Ancient Scroll": "A scroll covered in ancient writings and symbols. It may hold valuable knowledge.",
+        "Enchanted Amulet": "An amulet with a magical aura. It seems to protect its wearer.",
+        "Crystal Prism": "A multifaceted crystal prism that refracts light into dazzling patterns.",
+        "Labyrinth Map": "A map of the crystal labyrinth, marked with the path you've taken.",
+        "Royal Crown": "A majestic crown adorned with precious gems. It symbolizes royalty and power.",
+        "Ornate Key": "An intricately designed key with ornate patterns. It must unlock something special.",
+        "Ancient Tome": "A thick, ancient tome filled with wisdom from generations past.",
+        "Secret Scroll": "A tightly rolled scroll sealed with a mysterious emblem. Its contents are concealed.",
+        "Enchanted Rose": "A vibrant rose with petals that shimmer with enchantment.",
+        "Garden Statue": "A stone statue of a regal figure, weathered by time and magic.",
+        "Forged Sword": "A finely crafted sword with a blade that gleams in the light. It feels balanced and sharp.",
+        "Iron Shield": "A sturdy iron shield with an embossed design. It offers reliable protection.",
+        "Mug of Ale": "A hearty mug of ale, perfect for quenching your thirst after a long day.",
+        "Tavern Songbook": "A songbook filled with lively tavern tunes. It's sure to lift spirits.",
+        "Market Goods": "Assorted goods from the marketplace. They could be traded or used on your journey.",
+        "Merchant's Map": "A map annotated with merchant's notes, revealing trade routes and hidden deals.",
+        "Fisherman's Net": "A strong net used by fishermen to catch fish in the river.",
+        "River Fish": "A fresh catch from the river. It looks delicious when cooked.",
+        "Campfire Supplies": "Supplies for a campfire, including firewood and kindling.",
+        "Fishing Rod": "A sturdy fishing rod with a line and hook. It's ideal for catching river fish.",
+        "Waterfall Spray": "Refreshing spray from the waterfall. It invigorates the senses.",
+        "Nature's Beauty": "A small token of the natural beauty found at the waterfall viewpoint.",
+        "Mountain Crystal": "A transparent crystal found at the mountain peak. It glistens in the sunlight.",
+        "Eagle Feather": "A feather from an eagle that soars high above the mountain. It's a symbol of freedom.",
+        "Cave Map": "A detailed map of the cave's intricate tunnels and chambers.",
+        "Luminous Fungus": "A fungus that emits a soft, eerie glow. It provides dim illumination.",
+        "Monk's Robe": "A humble robe worn by monks in the monastery. It exudes tranquility.",
+        "Enlightened Scroll": "A scroll filled with teachings that guide seekers toward enlightenment.",
+        "Oasis Water": "Cool and refreshing water from the hidden oasis. It quenches your thirst.",
+        "Palm Leaf Fan": "A fan made from palm leaves. It provides relief from the scorching desert heat.",
+        "Desert Flower": "A resilient desert flower with vibrant petals. It thrives in harsh conditions.",
+        "Ancient Relic": "A relic from the ancient ruins, brimming with history and mystery.",
+        "Dusty Parchment": "A parchment covered in dusty inscriptions. It may reveal secrets of the past.",
+        "Tropical Cocktail": "A colorful cocktail served at the beach bar. It tastes like a tropical paradise.",
+        "Seashell Necklace": "A necklace made of seashells collected from the beach. It carries the ocean's essence.",
+        "Beach Towel": "A soft and absorbent beach towel. It's perfect for lounging on the sandy shore.",
+        "Sunscreen": "A bottle of sunscreen to protect your skin from the sun's intense rays.",
+        "Shipwreck Debris": "Various debris and remnants from the shipwreck. They tell a tale of maritime adventures.",
+        "Treasure Map": "A weathered map that hints at hidden treasure buried beneath the beach's sands.",
+        "Ghostly Apparition": "A spectral apparition that flickers and wavers, emitting an eerie presence.",
+        "Creaky Floorboard": "A floorboard that emits unsettling creaks with each step. It adds to the haunted atmosphere.",
+        "Dusty Tome": "A tome covered in layers of dust, filled with forgotten knowledge and arcane spells.",
+        "Chilling Draft": "A cold and unsettling draft that seems to carry whispers from the depths of the house.",
+        "Hidden Secrets": "Mysterious secrets that lie in the shadows of the creepy basement, waiting to be uncovered.",
+        "Picnic Basket": "A well-stocked picnic basket, ready for a relaxing meal in the meadow.",
+        "Floral Blanket": "A soft blanket adorned with floral patterns. It adds comfort to your picnic.",
+        "Gazebo Bench": "A bench inside the picturesque gazebo, offering a peaceful place to rest.",
+        "Tranquil View": "A view from the gazebo that captures the serenity and beauty of the meadow.",
+        "Butterfly Net": "A net designed for catching butterflies in the colorful butterfly garden.",
+        "Colorful Butterfly": "A butterfly with vibrant wings that flutter gracefully in the meadow.",
+    };
+
+    const objects = [
+        "Key",
+        "Sword",
+        "Potion",
+        "Shield",
+        "Map"
+    ];
+
+    const collectedObjects = [];
+
+    // Initialize the exploredBuildings object with all buildings as unexplored
+    const exploredBuildings = {};
+
+    for (let i = 0; i < locations.length; i++) {
+        const locationData = locations[i];
+        exploredBuildings[i] = {};
+        for (let j = 0; j < locationData.buildings.length; j++) {
+            const buildingName = locationData.buildings[j];
+            exploredBuildings[i][buildingName] = false;
+        }
+    }
+
+    inputText.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault(); // Prevent a newline character
+            const command = inputText.value.trim().toLowerCase(); // Remove leading/trailing whitespace and convert to lowercase
+            if (command !== "") {
+                processCommand(command);
+                inputText.value = ""; // Clear the input field
+            }
+        }
+    });
+
+    function processCommand(command) {
+        let response = "";
+        let responseClass = ""; // CSS class for the response text
+        if (command === "look around") {
+            const location = locations[currentLocation];
+            response = location.description;
+            const buildingNames = location.buildings.map(building => building.name);
+            response += `\nBuildings in this area: ${buildingNames.join(", ")}`;
+            responseClass = "blue-text"; // Set response color to light blue
+        } else if (command === "collect") {
+            const currentObject = objects[currentLocation];
+            if (collectedObjects.includes(currentObject)) {
+                response = `You have already collected the ${currentObject}.`;
+                responseClass = "green-text"; // Set response color to light green
+            } else {
+                collectedObjects.push(currentObject);
+                response = `You have collected the ${currentObject}.`;
+                responseClass = "green-text"; // Set response color to light green
+            }
+        } else if (command === "inventory") {
+            response = "You have collected the following items:\n";
+            collectedObjects.forEach((item, index) => {
+                response += `${index + 1}. ${item}\n`;
+            });
+            response += "Type 'look item [number]' to examine a specific item.";
+            if (exploredBuildings[currentLocation] && currentBuilding) {
+                response += "\nType 'drop item [number]' to drop an item while exploring this building.";
+            }
+            responseClass = "red-text"; // Set response color to light red
+        } else if (command.startsWith("look item ")) {
+            // Handle 'look item [number]' command to examine a specific item
+            const parts = command.split(" ");
+            if (parts.length === 3) {
+                const itemIndex = parseInt(parts[2]) - 1;
+                if (!isNaN(itemIndex) && itemIndex >= 0 && itemIndex < collectedObjects.length) {
+                    const selectedItem = collectedObjects[itemIndex];
+                    const itemDescription = itemDescriptions[selectedItem] || "No description available for this item.";
+                    response = `You examine the ${selectedItem}: ${itemDescription}`;
+                    responseClass = "pink-text"; // Set response color to pink
+                } else {
+                    response = "Invalid item number. Type 'inventory' to see your items and their numbers.";
+                    responseClass = "pink-text"; // Set response color to pink
+                }
+            } else {
+                response = "Invalid command. Type 'inventory' to see your items and their numbers.";
+                responseClass = "pink-text"; // Set response color to pink
+            }
+        } else if (command.startsWith("drop item ")) {
+            const parts = command.split(" ");
+            if (parts.length === 3) {
+                const itemIndex = parseInt(parts[2]) - 1;
+                if (!isNaN(itemIndex) && itemIndex >= 0 && itemIndex < collectedObjects.length) {
+                    const droppedItem = collectedObjects.splice(itemIndex, 1)[0];
+                    response = `You drop the ${droppedItem} in the ${currentBuilding}.`;
+                    // Find the building in the current location and add the dropped item back to its items
+                    const currentLocationData = locations[currentLocation];
+                    const buildingToDropItem = currentLocationData.buildings.find(building => building.name === currentBuilding);
+                    if (buildingToDropItem) {
+                        if (!buildingToDropItem.items) {
+                            buildingToDropItem.items = [];
+                        }
+                        buildingToDropItem.items.push(droppedItem);
+                    }
+                    responseClass = "pink-text"; // Set response color to light blue
+                } else {
+                    response = "Invalid item number. Type 'inventory' to see your items and their numbers.";
+                    responseClass = "pink-text"; // Set response color to pink
+                }
+            } else {
+                response = "Invalid command. Type 'inventory' to see your items and their numbers.";
+                responseClass = "pink-text"; // Set response color to pink
+            }
+        } else if (command === "move") {
+            // Reset the exploredBuildings for the current location
+            exploredBuildings[currentLocation] = {};
+            currentBuilding = "";
+
+            // Move to the next location cyclically
+            currentLocation = (currentLocation + 1) % locations.length;
+
+            response = `You have moved to the ${locations[currentLocation].name}.`;
+            responseClass = "purple-text"; // Set response color to light purple
+        } else if (command.startsWith("explore")) {
+            // Extract the building name from the command
+            const buildingNameToExplore = command.slice(8).trim();
+            const currentLocationData = locations[currentLocation];
+
+            // Find the building with the specified name in the current location
+            const buildingToExplore = currentLocationData.buildings.find(building => building.name.toLowerCase() === buildingNameToExplore.toLowerCase());
+
+            if (buildingToExplore) {
+                currentBuilding = buildingToExplore.name;
+                exploreSpecificBuilding(buildingToExplore);
+            } else {
+                response = `There is no building named "${buildingNameToExplore}" in this location.`;
+                responseClass = "yellow-text"; // Set response color to yellow
+            }
+        } else {
+            response = "Invalid command. Try 'look around', 'collect', 'inventory', 'move', or 'explore [building name]'.";
+        }
+        outputDiv.innerHTML += `<p class="${responseClass}">${response}</p>`;
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+
+    function exploreSpecificBuilding(building) {
+        const buildingName = building.name;
+
+        if (!exploredBuildings[currentLocation][buildingName]) {
+            exploredBuildings[currentLocation][buildingName] = true;
+
+            const buildingDescription = building.description;
+            const response = `You explore the ${buildingName}. ${buildingDescription}`;
+            outputDiv.innerHTML += `<p class="yellow-text">${response}</p>`;
+
+            // Check if the building has items
+            if (building.items && building.items.length > 0) {
+                const randomItemIndex = Math.floor(Math.random() * building.items.length);
+                const foundItem = building.items[randomItemIndex];
+
+                // Remove the found item from the building's items array
+                building.items.splice(randomItemIndex, 1);
+
+                collectedObjects.push(foundItem);
+                const itemResponse = `You found a ${foundItem} in the ${buildingName}!`;
+                outputDiv.innerHTML += `<p class="green-text">${itemResponse}</p>`;
+            } else {
+                // If no items are left, inform the player
+                outputDiv.innerHTML += `<p class="yellow-text">There are no more items to collect in the ${buildingName}.</p>`;
+            }
+        } else {
+            outputDiv.innerHTML += `<p class="yellow-text">You have already explored the ${buildingName}.</p>`;
+        }
+
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+
+    processCommand("look around");
+</script>
+</body>
+</html>
