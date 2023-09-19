@@ -76,12 +76,12 @@
     <div class="text-container" id="output">
         <h1>Welcome to the Text Adventure Game!</h1>
         <p><span class="blue-text">- Type 'look around'</span> to see your current location.</p>
-        <p><span class="green-text">- Type 'collect'</span> to collect objects at your current location.</p>
+        <p><span class="green-text">- Type 'objective'</span> to view objectives in your current location.</p>
         <p><span class="red-text">- Type 'inventory'</span> to see the objects you have collected.</p>
         <p><span class="pink-text">- Type 'look item [index]'</span> to see the item you have collected.</p>
-        <p><span class="pink-text">- Type 'drop item [index]'</span> to drop the item you have collected.</p>
+        <p><span class="pink-text">- Type 'drop item [index]'</span> to drop an item while exploring a building.</p>
         <p><span class="purple-text">- Type 'move'</span> to move to the next location.</p>
-        <p><span class="yellow-text">- Type 'explore'</span> to explore the building.</p>
+        <p><span class="yellow-text">- Type 'explore [building name]'</span> to explore a specific building in your current location.</p>
         <p>Have fun exploring!</p>
     </div>
     <label for="input-text"></label><textarea id="input-text" rows="4"
@@ -116,7 +116,11 @@
                     description: "A tranquil clearing bathed in dappled sunlight, surrounded by wildflowers.",
                     items: ["Wildflower Bouquet", "Bird's Feather"],
                 },
-            ]
+            ],
+            objectives: [
+                "Find the Golden Key",
+                "Discover the Old Map",
+            ],
         },
         {
             name: "Cave",
@@ -137,7 +141,11 @@
                     description: "A labyrinth made of beautiful glowing crystals, reflecting light in all directions.",
                     items: ["Crystal Prism", "Labyrinth Map"],
                 },
-            ]
+            ],
+            objectives: [
+                "Retrieve the Crystal Shard",
+                "Explore the Hidden Chamber",
+            ],
         },
         {
             name: "Castle",
@@ -158,7 +166,11 @@
                     description: "Lush gardens with colorful flowers and fountains, now overgrown and enchanted.",
                     items: ["Enchanted Rose", "Garden Statue"],
                 },
-            ]
+            ],
+            objectives: [
+                "Attend the Royal Ball",
+                "Unlock the Tower of Secrets",
+            ],
         },
         {
             name: "Village",
@@ -179,7 +191,11 @@
                     description: "A bustling marketplace filled with vendors selling goods of all kinds.",
                     items: ["Market Goods", "Merchant's Map"],
                 },
-            ]
+            ],
+            objectives: [
+                "Visit the Blacksmith's Forge",
+                "Enjoy a Drink at the Tavern",
+            ],
         },
         {
             name: "River",
@@ -200,7 +216,11 @@
                     description: "A rocky ledge overlooking a majestic waterfall, a sight to behold.",
                     items: ["Waterfall Spray", "Nature's Beauty"],
                 },
-            ]
+            ],
+            objectives: [
+                "Explore the Fisherman's Hut",
+                "Admire the Waterfall View",
+            ],
         },
         {
             name: "Mountain",
@@ -221,7 +241,11 @@
                     description: "A serene monastery where monks meditate and practice ancient arts.",
                     items: ["Monk's Robe", "Enlightened Scroll"],
                 },
-            ]
+            ],
+            objectives: [
+                "Reach the Mountain Peak",
+                "Enter the Mysterious Cave",
+            ],
         },
         {
             name: "Desert",
@@ -242,7 +266,11 @@
                     description: "Ruined structures from a bygone era, half-buried in the shifting sands.",
                     items: ["Ancient Relic", "Dusty Parchment"],
                 },
-            ]
+            ],
+            objectives: [
+                "Discover the Hidden Oasis",
+                "Explore the Ancient Ruins",
+            ],
         },
         {
             name: "Beach",
@@ -263,7 +291,11 @@
                     description: "The remains of a shipwreck washed ashore, a reminder of the sea's power.",
                     items: ["Shipwreck Debris", "Treasure Map"],
                 },
-            ]
+            ],
+            objectives: [
+                "Relax at the Beach Bar",
+                "Investigate the Shipwreck",
+            ],
         },
         {
             name: "Haunted House",
@@ -284,7 +316,11 @@
                     description: "A dark and ominous basement with chilling drafts and secrets hidden in shadows.",
                     items: ["Chilling Draft", "Hidden Secrets"],
                 },
-            ]
+            ],
+            objectives: [
+                "Explore the Haunted Bedroom",
+                "Search the Dusty Library",
+            ],
         },
         {
             name: "Meadow",
@@ -305,7 +341,11 @@
                     description: "A garden filled with blooming flowers and butterflies fluttering about.",
                     items: ["Butterfly Net", "Colorful Butterfly"],
                 },
-            ]
+            ],
+            objectives: [
+                "Have a Picnic at the Picnic Area",
+                "Enjoy the Tranquil View at the Gazebo",
+            ],
         },
     ];
 
@@ -370,14 +410,6 @@
         "Colorful Butterfly": "A butterfly with vibrant wings that flutter gracefully in the meadow.",
     };
 
-    const objects = [
-        "Key",
-        "Sword",
-        "Potion",
-        "Shield",
-        "Map"
-    ];
-
     const collectedObjects = [];
 
     // Initialize the exploredBuildings object with all buildings as unexplored
@@ -406,20 +438,23 @@
     function processCommand(command) {
         let response = "";
         let responseClass = ""; // CSS class for the response text
+
         if (command === "look around") {
             const location = locations[currentLocation];
             response = location.description;
             const buildingNames = location.buildings.map(building => building.name);
             response += `\nBuildings in this area: ${buildingNames.join(", ")}`;
             responseClass = "blue-text"; // Set response color to light blue
-        } else if (command === "collect") {
-            const currentObject = objects[currentLocation];
-            if (collectedObjects.includes(currentObject)) {
-                response = `You have already collected the ${currentObject}.`;
+        } else if (command === "objective") {
+            const currentLocationData = locations[currentLocation];
+            if (currentLocationData.objectives && currentLocationData.objectives.length > 0) {
+                response = "Objectives in this area:\n";
+                currentLocationData.objectives.forEach((objective, index) => {
+                    response += `${index + 1}. ${objective}\n`;
+                });
                 responseClass = "green-text"; // Set response color to light green
             } else {
-                collectedObjects.push(currentObject);
-                response = `You have collected the ${currentObject}.`;
+                response = "There are no objectives in this area.";
                 responseClass = "green-text"; // Set response color to light green
             }
         } else if (command === "inventory") {
@@ -506,8 +541,9 @@
                 responseClass = "yellow-text"; // Set response color to yellow
             }
         } else {
-            response = "Invalid command. Try 'look around', 'collect', 'inventory', 'move', or 'explore [building name]'.";
+            response = "Invalid command. Try 'look around', 'objective', 'inventory', 'move', or 'explore [building name]'.";
         }
+
         outputDiv.innerHTML += `<p class="${responseClass}">${response}</p>`;
         outputDiv.scrollTop = outputDiv.scrollHeight;
     }
