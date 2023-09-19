@@ -81,7 +81,8 @@
         <p><span class="pink-text">- Type 'look item [index]'</span> to see the item you have collected.</p>
         <p><span class="pink-text">- Type 'drop item [index]'</span> to drop an item while exploring a building.</p>
         <p><span class="purple-text">- Type 'move'</span> to move to the next location.</p>
-        <p><span class="yellow-text">- Type 'explore [building name]'</span> to explore a specific building in your current location.</p>
+        <p><span class="yellow-text">- Type 'explore [building name]'</span> to explore a specific building in your
+            current location.</p>
         <p>Have fun exploring!</p>
     </div>
     <label for="input-text"></label><textarea id="input-text" rows="4"
@@ -424,13 +425,44 @@
         }
     }
 
+    // Initialize command history and set the maximum history length to 10
+    const commandHistory = [];
+    const maxHistoryLength = 10;
+    let historyIndex = -1;
+
     inputText.addEventListener("keydown", (event) => {
         if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault(); // Prevent a newline character
-            const command = inputText.value.trim().toLowerCase(); // Remove leading/trailing whitespace and convert to lowercase
+            event.preventDefault();
+            const command = inputText.value.trim().toLowerCase();
             if (command !== "") {
+                // Add the command to the history
+                commandHistory.push(command);
+
+                // Limit the history to the specified maximum length
+                if (commandHistory.length > maxHistoryLength) {
+                    commandHistory.shift(); // Remove the oldest entry
+                }
+
+                // Reset history index
+                historyIndex = -1;
                 processCommand(command);
-                inputText.value = ""; // Clear the input field
+                inputText.value = "";
+            }
+        } else if (event.key === "ArrowUp") {
+            // Handle the "up" arrow key to navigate command history
+            if (historyIndex < commandHistory.length - 1) {
+                historyIndex++;
+                inputText.value = commandHistory[commandHistory.length - 1 - historyIndex];
+            }
+        } else if (event.key === "ArrowDown") {
+            // Handle the "down" arrow key to navigate command history
+            if (historyIndex >= 0) {
+                historyIndex--;
+                if (historyIndex === -1) {
+                    inputText.value = "";
+                } else {
+                    inputText.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                }
             }
         }
     });
@@ -458,15 +490,20 @@
                 responseClass = "green-text"; // Set response color to light green
             }
         } else if (command === "inventory") {
-            response = "You have collected the following items:\n";
-            collectedObjects.forEach((item, index) => {
-                response += `${index + 1}. ${item}\n`;
-            });
-            response += "Type 'look item [number]' to examine a specific item.";
-            if (exploredBuildings[currentLocation] && currentBuilding) {
-                response += "\nType 'drop item [number]' to drop an item while exploring this building.";
+            if (collectedObjects.length > 0) {
+                response = "You have collected the following items:\n";
+                collectedObjects.forEach((item, index) => {
+                    response += `${index + 1}. ${item}\n`;
+                });
+                response += "Type 'look item [number]' to examine a specific item.";
+                if (exploredBuildings[currentLocation] && currentBuilding) {
+                    response += "\nType 'drop item [number]' to drop an item while exploring this building.";
+                }
+                responseClass = "red-text"; // Set response color to light red
+            } else {
+                response = "Your inventory is empty.";
+                responseClass = "red-text"; // Set response color to light red
             }
-            responseClass = "red-text"; // Set response color to light red
         } else if (command.startsWith("look item ")) {
             // Handle 'look item [number]' command to examine a specific item
             const parts = command.split(" ");
@@ -518,7 +555,7 @@
         } else if (command === "move") {
             // Reset the exploredBuildings for the current location
             exploredBuildings[currentLocation] = {};
-            currentBuilding = "";
+            currentBuilding = ""; // Reset the currentBuilding variable
 
             // Move to the next location cyclically
             currentLocation = (currentLocation + 1) % locations.length;
