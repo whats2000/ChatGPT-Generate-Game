@@ -95,7 +95,6 @@
 
     // Game variables
     let currentLocation = 0;
-    let currentBuilding = "";
 
     const locations = [
         {
@@ -411,19 +410,60 @@
         "Colorful Butterfly": "A butterfly with vibrant wings that flutter gracefully in the meadow.",
     };
 
-    const collectedObjects = [];
+    // Loop through the locations
+    for (let location of locations) {
+        // Generate a random index to select a starting building
+        let randomIndex = Math.floor(Math.random() * location.buildings.length);
 
-    // Initialize the exploredBuildings object with all buildings as unexplored
-    const exploredBuildings = {};
+        // Set the startingBuilding for this location
+        location.startingBuilding = location.buildings[randomIndex].name;
+    }
 
-    for (let i = 0; i < locations.length; i++) {
-        const locationData = locations[i];
-        exploredBuildings[i] = {};
-        for (let j = 0; j < locationData.buildings.length; j++) {
-            const buildingName = locationData.buildings[j];
-            exploredBuildings[i][buildingName] = false;
+    // Loop through the locations
+    for (let location of locations) {
+        // Generate connections for each building in this location
+        for (let building of location.buildings) {
+            // Initialize an empty array to store connections if it doesn't exist
+            building.connections = building.connections || [];
+
+            // Generate random connections to other buildings in this location
+            let numConnections = Math.floor(Math.random() * (location.buildings.length - 1)) + 1; // Random number of connections (1 to n-1)
+
+            // Create an array to keep track of which buildings have been connected
+            let connectedBuildings = [];
+
+            while (building.connections.length < numConnections) {
+                let randomIndex = Math.floor(Math.random() * location.buildings.length);
+                let connectedBuilding = location.buildings[randomIndex];
+
+                // Ensure the building is not connected to itself and not connected already
+                if (connectedBuilding !== building &&
+                    !building.connections.includes(connectedBuilding.name) &&
+                    !connectedBuildings.includes(connectedBuilding.name)) {
+                    building.connections.push(connectedBuilding.name);
+                    connectedBuilding.connections = connectedBuilding.connections || []; // Initialize if it doesn't exist
+                    connectedBuilding.connections.push(building.name); // Establish the connection in both directions
+                    connectedBuildings.push(connectedBuilding.name); // Add to the connected buildings list
+                }
+            }
         }
     }
+
+    // Print the modified locations array to check the connections
+    console.log(locations);
+
+    // Define a variable to store the current starting building
+    let currentStartingBuilding = locations[0].startingBuilding;
+    let currentBuilding = currentStartingBuilding;
+
+    // Function to set the current starting building when entering a new location
+    function enterNewLocation(location) {
+        currentLocation = location;
+        currentStartingBuilding = location.startingBuilding; // Set the starting building for the current location
+        outputDiv.innerHTML += `<p class="purple-text">You have entered the ${location.name}.</p>`;
+    }
+
+    const collectedObjects = [];
 
     // Initialize command history and set the maximum history length to 10
     const commandHistory = [];
@@ -474,8 +514,19 @@
         if (command === "look around") {
             const location = locations[currentLocation];
             response = location.description;
+
+            // Get the names of all buildings in this area
             const buildingNames = location.buildings.map(building => building.name);
             response += `\nBuildings in this area: ${buildingNames.join(", ")}`;
+
+            // Check if the player is in a building and if it has connections
+            if (currentBuilding) {
+                const currentBuildingObject = location.buildings.find(b => b.name === currentBuilding);
+                if (currentBuildingObject && currentBuildingObject.connections.length > 0) {
+                    response += `\nYou are currently in the ${currentBuilding}. It is connected to: ${currentBuildingObject.connections.join(", ")}`;
+                }
+            }
+
             responseClass = "blue-text"; // Set response color to light blue
         } else if (command === "objective") {
             const currentLocationData = locations[currentLocation];
@@ -496,7 +547,7 @@
                     response += `${index + 1}. ${item}\n`;
                 });
                 response += "Type 'look item [number]' to examine a specific item.";
-                if (exploredBuildings[currentLocation] && currentBuilding) {
+                if (currentBuilding) {
                     response += "\nType 'drop item [number]' to drop an item while exploring this building.";
                 }
                 responseClass = "red-text"; // Set response color to light red
@@ -553,15 +604,20 @@
                 responseClass = "pink-text"; // Set response color to pink
             }
         } else if (command === "move") {
-            // Reset the exploredBuildings for the current location
-            exploredBuildings[currentLocation] = {};
-            currentBuilding = ""; // Reset the currentBuilding variable
+            // Check if the player is at the starting building of the current location
+            if (currentBuilding === currentStartingBuilding) {
+                currentBuilding = ""; // Reset the currentBuilding variable
 
-            // Move to the next location cyclically
-            currentLocation = (currentLocation + 1) % locations.length;
+                // Move to the next location cyclically
+                currentLocation = (currentLocation + 1) % locations.length;
 
-            response = `You have moved to the ${locations[currentLocation].name}.`;
-            responseClass = "purple-text"; // Set response color to light purple
+                enterNewLocation(locations[currentLocation]);
+
+                response = `You have moved to the ${locations[currentLocation].name}.`;
+                responseClass = "purple-text"; // Set response color to light purple
+            } else {
+                response = `<p class="purple-text">You must return to the starting building (${currentStartingBuilding}) before moving to another location.</p>`;
+            }
         } else if (command.startsWith("explore")) {
             // Extract the building name from the command
             const buildingNameToExplore = command.slice(8).trim();
@@ -571,8 +627,14 @@
             const buildingToExplore = currentLocationData.buildings.find(building => building.name.toLowerCase() === buildingNameToExplore.toLowerCase());
 
             if (buildingToExplore) {
-                currentBuilding = buildingToExplore.name;
-                exploreSpecificBuilding(buildingToExplore);
+                // Check if the building can be explored
+                if (currentBuilding === buildingToExplore.name || currentLocationData.buildings.some(b => b.connections.includes(buildingToExplore.name))) {
+                    currentBuilding = buildingToExplore.name;
+                    exploreSpecificBuilding(buildingToExplore);
+                } else {
+                    response = `You can't explore the "${buildingNameToExplore}" from your current location.`;
+                    responseClass = "yellow-text"; // Set response color to yellow
+                }
             } else {
                 response = `There is no building named "${buildingNameToExplore}" in this location.`;
                 responseClass = "yellow-text"; // Set response color to yellow
@@ -581,19 +643,30 @@
             response = "Invalid command. Try 'look around', 'objective', 'inventory', 'move', or 'explore [building name]'.";
         }
 
-        outputDiv.innerHTML += `<p class="${responseClass}">${response}</p>`;
+        // Split the response text into separate lines using "\n" as the delimiter
+        const lines = response.split("\n");
+
+        // Iterate through the lines and create a separate <p> element for each
+        lines.forEach(line => {
+            outputDiv.innerHTML += `<p class="${responseClass}">${line}</p>`;
+        });
+
         outputDiv.scrollTop = outputDiv.scrollHeight;
     }
 
     function exploreSpecificBuilding(building) {
         const buildingName = building.name;
 
-        if (!exploredBuildings[currentLocation][buildingName]) {
-            exploredBuildings[currentLocation][buildingName] = true;
+        // Find the current building object based on its name
+        const currentBuildingObject = locations[currentLocation].buildings.find(b => b.name === currentBuilding);
 
+        // Get the list of connections for the current building
+        const currentBuildingConnections = currentBuildingObject ? currentBuildingObject.connections : [];
+
+        // Check if the current building is connected to the building being explored
+        if (currentBuilding === buildingName || currentBuildingConnections.includes(buildingName)) {
             const buildingDescription = building.description;
-            const response = `You explore the ${buildingName}. ${buildingDescription}`;
-            outputDiv.innerHTML += `<p class="yellow-text">${response}</p>`;
+            let response = `You explore the ${buildingName}. ${buildingDescription}`;
 
             // Check if the building has items
             if (building.items && building.items.length > 0) {
@@ -605,13 +678,22 @@
 
                 collectedObjects.push(foundItem);
                 const itemResponse = `You found a ${foundItem} in the ${buildingName}!`;
-                outputDiv.innerHTML += `<p class="green-text">${itemResponse}</p>`;
+                response += `<p class="green-text">${itemResponse}</p>`;
             } else {
                 // If no items are left, inform the player
-                outputDiv.innerHTML += `<p class="yellow-text">There are no more items to collect in the ${buildingName}.</p>`;
+                response += `<p class="yellow-text">There are no more items to collect in the ${buildingName}.</p>`;
             }
+
+            // Check if the building has connections and inform the player
+            if (building.connections.length > 0) {
+                const connectionsResponse = `Current building is connect to : ${building.connections.join(", ")}`;
+                response += `<p class="blue-text">${connectionsResponse}</p>`;
+            }
+
+            outputDiv.innerHTML += `<p class="yellow-text">${response}</p>`;
         } else {
-            outputDiv.innerHTML += `<p class="yellow-text">You have already explored the ${buildingName}.</p>`;
+            // Inform the player that they can't explore this building
+            outputDiv.innerHTML += `<p class="yellow-text">You can't explore the ${buildingName} from your current location.</p>`;
         }
 
         outputDiv.scrollTop = outputDiv.scrollHeight;
