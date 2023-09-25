@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bouncing Box Game</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #121212; /* Dark background color */
+        }
+        canvas {
+            display: block;
+        }
+        #scoreboard {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 36px; /* Adjust the font size as needed */
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="scoreboard">Score: 0</div>
+<script src="game.js"></script>
+</body>
+</html>
