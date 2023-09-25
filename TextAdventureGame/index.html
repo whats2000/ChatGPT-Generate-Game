@@ -458,8 +458,8 @@
 
     // Function to set the current starting building when entering a new location
     function enterNewLocation(location) {
-        currentLocation = location;
         currentStartingBuilding = location.startingBuilding; // Set the starting building for the current location
+        currentBuilding = currentStartingBuilding;
         outputDiv.innerHTML += `<p class="purple-text">You have entered the ${location.name}.</p>`;
     }
 
@@ -606,15 +606,10 @@
         } else if (command === "move") {
             // Check if the player is at the starting building of the current location
             if (currentBuilding === currentStartingBuilding) {
-                currentBuilding = ""; // Reset the currentBuilding variable
-
                 // Move to the next location cyclically
                 currentLocation = (currentLocation + 1) % locations.length;
 
                 enterNewLocation(locations[currentLocation]);
-
-                response = `You have moved to the ${locations[currentLocation].name}.`;
-                responseClass = "purple-text"; // Set response color to light purple
             } else {
                 response = `<p class="purple-text">You must return to the starting building (${currentStartingBuilding}) before moving to another location.</p>`;
             }
