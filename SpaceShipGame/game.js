@@ -20,6 +20,9 @@ meteoriteAImage.src = "static/images/MeteoriteA.png"; // Path to the meteorite i
 const meteoriteBImage = new Image();
 meteoriteBImage.src = "static/images/MeteoriteB.png"; // Path to the MeteoriteB image
 
+const explosionImage = new Image();
+explosionImage.src = "static/images/Explosion.png"; // Path to the explosion image
+
 const spaceship = {
     x: 50,
     y: 50,
@@ -30,6 +33,7 @@ const spaceship = {
 
 let meteorites = [];
 let missiles = [];
+const explosions = [];
 
 let isArrowUpPressed = false;
 let isArrowDownPressed = false;
@@ -71,6 +75,8 @@ function createMeteoriteA() {
         speedY: -1.5 + Math.random() * 3, // No vertical movement for MeteoriteA
         image: meteoriteAImage, // Use the MeteoriteA image
         health: 1, // Initial health of 2
+        isExploding: false, // Add this property
+        explosionTime: 0,   // Add this property
     });
 }
 
@@ -96,6 +102,8 @@ function createMeteoriteB() {
         image: meteoriteBImage, // Use the MeteoriteB image
         rotation: 0, // Initial rotation angle
         health: 3, // Initial health of 3
+        isExploding: false, // Add this property
+        explosionTime: 0,   // Add this property
     });
 }
 
@@ -281,6 +289,39 @@ function drawSpaceship() {
     ctx.drawImage(spaceshipImage, spaceship.x, spaceship.y, spaceship.width, spaceship.height);
 }
 
+function drawExplosion() {
+    // Remove expired explosions (older than 125 milliseconds)
+    const currentTime = Date.now();
+    for (let i = 0; i < explosions.length; i++) {
+        const explosion = explosions[i];
+
+        if (currentTime - explosion.timestamp > 250) {
+            explosions.splice(i, 1);
+            i--;
+            continue;
+        }
+
+        const deltaTime = Date.now() - explosion.timestamp;
+
+        // Calculate the scale factor based on deltaTime
+        const scaleFactor = deltaTime / 250;
+
+        // Calculate the scaled size and position
+        const scaledWidth = 100 * scaleFactor;
+        const scaledHeight = 100 * scaleFactor;
+        const offsetX = (100 - scaledWidth) / 2;
+        const offsetY = (100 - scaledHeight) / 2;
+
+        ctx.drawImage(
+            explosionImage,
+            explosions[i].x + offsetX,
+            explosions[i].y + offsetY,
+            scaledWidth,
+            scaledHeight
+        );
+    }
+}
+
 function resetFireCooldown() {
     canFireMissile = true;
 }
@@ -317,6 +358,9 @@ function checkMissileMeteoriteCollisions() {
                 missile.y < meteorite.y + meteorite.height &&
                 missile.y + missile.height > meteorite.y
             ) {
+                // Add the explosion to the explosions array with a timestamp
+                explosions.push({ x: missile.x, y: missile.y - 40, timestamp: Date.now() });
+
                 missiles.splice(i, 1);
                 i--;
 
@@ -325,6 +369,7 @@ function checkMissileMeteoriteCollisions() {
 
                 // If health reaches 0, remove the missile and meteorite
                 if (meteorite.health <= 0) {
+
                     meteorites.splice(j, 1);
                     j--;
 
@@ -344,7 +389,6 @@ function checkMissileMeteoriteCollisions() {
         }
     }
 }
-
 
 function gameOver() {
     // Change the game state to "gameOver"
@@ -399,6 +443,7 @@ function animate() {
         drawSpaceship();
         drawMissiles();
         drawMeteorites();
+        drawExplosion();
         checkMissileMeteoriteCollisions();
         checkCollisions(); // Check for collisions at each frame
     } else if (gameState === GameState.GAME_OVER) {
