@@ -9,7 +9,7 @@ function resizeCanvas() {
 resizeCanvas();
 
 const spaceshipImage = new Image();
-spaceshipImage.src = "static/images/SpaceShip.jpg"; // Path to the spaceship image
+spaceshipImage.src = "static/images/SpaceShip.png"; // Path to the spaceship image
 
 const missileImage = new Image();
 missileImage.src = "static/images/MissileA.png"; // Path to the missile image
@@ -23,8 +23,8 @@ meteoriteBImage.src = "static/images/MeteoriteB.png"; // Path to the MeteoriteB 
 const spaceship = {
     x: 50,
     y: 50,
-    width: 150,
-    height: 100,
+    width: 90,
+    height: 60,
     speed: 5,
 };
 
@@ -39,9 +39,12 @@ let isSpacePressed = false;
 let canFireMissile = true;
 let animationFrame;
 let score = 0;
+let gameStartTime = 0;
 
-let baseInterval = 5000; // Initial base interval in milliseconds
-let canCreateMeteorite = true;
+let baseIntervalA = 2500; // Initial base interval in milliseconds
+let baseIntervalB = 5000; // Initial base interval in milliseconds
+let canCreateMeteoriteA = true;
+let canCreateMeteoriteB = true;
 
 const scoreboard = document.getElementById("scoreboard");
 
@@ -65,7 +68,7 @@ function createMeteoriteA() {
         width: 80, // Fixed width for meteorites
         height: 50, // Fixed height for meteorites
         speedX: -3.1 - Math.random() * 3, // Move left with random speed
-        speedY: - 1.5 + Math.random() * 3, // No vertical movement for MeteoriteA
+        speedY: -1.5 + Math.random() * 3, // No vertical movement for MeteoriteA
         image: meteoriteAImage, // Use the MeteoriteA image
         health: 1, // Initial health of 2
     });
@@ -73,22 +76,32 @@ function createMeteoriteA() {
 
 function createMeteoriteB() {
     const minX = 0; // The minimum x-position (left of the canvas)
-    const maxX = canvas.width - 80; // The maximum x-position (adjust the width as needed)
+    const maxX = canvas.width; // The maximum x-position (adjust the width as needed)
 
     const x = minX + Math.random() * (maxX - minX);
 
+    const isTopToBottom = Math.random() < 0.5; // 50% chance of top to bottom, 50% chance of bottom to top
+
+    const speedY = isTopToBottom ? 0.5 + Math.random() * 2 : -0.5 - Math.random() * 2;
+
+    const y = isTopToBottom ? -200 : canvas.height + 200;
+
     meteorites.push({
         x: x,
-        y: -200, // Start from the top
-        width: 150, // Fixed width for meteorites
-        height: 150, // Fixed height for meteorites
-        speedX: - 0.5 + Math.random(), // No horizontal movement for MeteoriteB
-        speedY: 0.5 + Math.random() * 2, // Move downward with random speed
+        y: y,
+        width: 80, // Fixed width for meteorites
+        height: 80, // Fixed height for meteorites
+        speedX: -1 + Math.random() * 2, // No horizontal movement for MeteoriteB
+        speedY: speedY, // Move upward or downward with random speed
         image: meteoriteBImage, // Use the MeteoriteB image
         rotation: 0, // Initial rotation angle
         health: 3, // Initial health of 3
     });
 }
+
+// Usage in your code
+createMeteoriteB(); // This will create a MeteoriteB with a 50% chance of moving from top to bottom or bottom to top.
+
 
 document.addEventListener("keydown", function (event) {
     switch (event.key) {
@@ -189,31 +202,53 @@ function updateMeteorites() {
             meteorite.rotation += 0.005; // Adjust the rotation speed as needed
         }
 
-        if (meteorite.x + meteorite.width < 0 || meteorite.y > canvas.height) {
+        // Check if meteorite A is out of bounds on the left
+        if (meteorite.image === meteoriteAImage &&
+            meteorite.x + meteorite.width < 0
+        ) {
+            meteorites.splice(i, 1);
+            i--;
+        }
+
+        // Check if meteorite B is out of bounds in both directions (top and bottom)
+        if (meteorite.image === meteoriteBImage &&
+            ((meteorite.y > canvas.height + 100 && meteorite.speedY > 0) || // Meteorite moving from top to bottom and out of the canvas
+                (meteorite.y < -100 && meteorite.speedY < 0)) // Meteorite moving from bottom to top and out of the canvas
+        ) {
             meteorites.splice(i, 1);
             i--;
         }
     }
 
     // Calculate the number of meteorites based on the player's score
-    const numMeteorites = Math.floor(score / 20) + 2; // +1 ensures there's always at least 2 meteorite
+    const numMeteorites = Math.floor(score / 20) + 2; // +1 ensures there's always at least 2 meteorites
 
-    // Create new meteorites with a dynamically adjusted interval
-    if (canCreateMeteorite) {
-        let randomInterval = baseInterval + Math.random() * baseInterval - 200 * Math.floor(score / 10); // Random interval within the baseInterval range
-        randomInterval = randomInterval > 1000 ? randomInterval : 1000;
+    // Create new meteorites with a dynamically adjusted interval for meteorite A
+    if (canCreateMeteoriteA) {
+        let randomInterval = baseIntervalA + Math.random() * (baseIntervalA - 200 * Math.floor(score / 10)); // Random interval within the baseInterval range
+        randomInterval = randomInterval > 1000 ? randomInterval : 1000; // Ensure a minimum interval of 1000ms
         setTimeout(function () {
             for (let j = 0; j < numMeteorites; j++) {
-                if (Math.random() < 0.7) {
-                    createMeteoriteA();
-                } else {
-                    createMeteoriteB();
-                }
+                createMeteoriteA();
             }
-            canCreateMeteorite = true;
+            canCreateMeteoriteA = true;
         }, randomInterval);
 
-        canCreateMeteorite = false;
+        canCreateMeteoriteA = false;
+    }
+
+    // Create new meteorites with a dynamically adjusted interval for meteorite B
+    if (canCreateMeteoriteB) {
+        let randomInterval = baseIntervalB + Math.random() * (baseIntervalB - 200 * Math.floor(score / 10)); // Random interval within the baseInterval range
+        randomInterval = randomInterval > 1000 ? randomInterval : 1000; // Ensure a minimum interval of 1000ms
+        setTimeout(function () {
+            for (let j = 0; j < numMeteorites; j++) {
+                createMeteoriteB();
+            }
+            canCreateMeteoriteB = true;
+        }, randomInterval);
+
+        canCreateMeteoriteB = false;
     }
 }
 
@@ -348,9 +383,9 @@ function animate() {
         if (isSpacePressed && canFireMissile) {
             missiles.push({
                 x: spaceship.x + spaceship.width,
-                y: spaceship.y + spaceship.height / 2,
-                width: 50,
-                height: 20,
+                y: spaceship.y + spaceship.height / 2 - 7,
+                width: 40,
+                height: 16,
                 speed: 5,
                 isFired: true,
             });
@@ -365,7 +400,7 @@ function animate() {
         drawMissiles();
         drawMeteorites();
         checkMissileMeteoriteCollisions();
-        checkCollisions(); // Check for collisions at each frame
+        // checkCollisions(); // Check for collisions at each frame
     } else if (gameState === GameState.GAME_OVER) {
         // Display game over message and allow starting a new game
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -384,9 +419,10 @@ function startNewGame() {
     missiles = [];
     spaceship.x = 50;
     spaceship.y = 50;
-    baseInterval = 5000; // Reset the base interval
-    canCreateMeteorite = true;
+    baseIntervalA = 5000; // Reset the base interval
+    canCreateMeteoriteA = true;
     canFireMissile = true;
+    gameStartTime = Date.now();
 
     // Reset the score to 0
     score = 0;
