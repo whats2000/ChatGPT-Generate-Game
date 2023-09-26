@@ -400,7 +400,7 @@ function animate() {
         drawMissiles();
         drawMeteorites();
         checkMissileMeteoriteCollisions();
-        // checkCollisions(); // Check for collisions at each frame
+        checkCollisions(); // Check for collisions at each frame
     } else if (gameState === GameState.GAME_OVER) {
         // Display game over message and allow starting a new game
         ctx.clearRect(0, 0, canvas.width, canvas.height);
