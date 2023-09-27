@@ -11,8 +11,11 @@ resizeCanvas();
 const spaceshipImage = new Image();
 spaceshipImage.src = "static/images/SpaceShip.png"; // Path to the spaceship image
 
-const missileImage = new Image();
-missileImage.src = "static/images/MissileA.png"; // Path to the missile image
+const missileAImage = new Image();
+missileAImage.src = "static/images/MissileA.png"; // Path to the missile image
+
+const missileBImage = new Image();
+missileBImage.src = "static/images/MissileB.png"; // Path to the missile B image
 
 const meteoriteAImage = new Image();
 meteoriteAImage.src = "static/images/MeteoriteA.png"; // Path to the meteorite image
@@ -23,6 +26,9 @@ meteoriteBImage.src = "static/images/MeteoriteB.png"; // Path to the MeteoriteB 
 const explosionImage = new Image();
 explosionImage.src = "static/images/Explosion.png"; // Path to the explosion image
 
+const enemyImage = new Image();
+enemyImage.src = "static/images/SpacePirateShip.png"; // Path to the enemy image
+
 const spaceship = {
     x: 50,
     y: 50,
@@ -32,9 +38,12 @@ const spaceship = {
 };
 
 let meteorites = [];
-let missiles = [];
-const explosions = [];
+let missilesA = [];
+let missilesB = [];
+let explosions = [];
+let enemies = [];
 
+let lastEnemyCreationTime = 0; // Initialize this variable
 let isArrowUpPressed = false;
 let isArrowDownPressed = false;
 let isArrowLeftPressed = false;
@@ -107,9 +116,23 @@ function createMeteoriteB() {
     });
 }
 
-// Usage in your code
-createMeteoriteB(); // This will create a MeteoriteB with a 50% chance of moving from top to bottom or bottom to top.
+function createEnemy() {
+    const minY = 0; // The minimum y-position (top of the canvas)
+    const maxY = canvas.height - 60; // The maximum y-position (adjust the height as needed)
 
+    const y = minY + Math.random() * (maxY - minY);
+
+    enemies.push({
+        x: canvas.width + 100, // Start from the right edge with some offset
+        y: y,
+        width: 90, // Fixed width for enemies
+        height: 60, // Fixed height for enemies
+        image: enemyImage, // Use the enemy image
+        speed: 0.5, // Set the speed to 0.5
+        health: 5,
+        lastMissileBFiredTime: Date.now() + 1500
+    });
+}
 
 document.addEventListener("keydown", function (event) {
     switch (event.key) {
@@ -184,15 +207,30 @@ function updateSpaceshipPosition() {
     }
 }
 
-function updateMissiles() {
-    for (let i = 0; i < missiles.length; i++) {
-        const missile = missiles[i];
+function updateMissilesA() {
+    for (let i = 0; i < missilesA.length; i++) {
+        const missile = missilesA[i];
 
         if (missile.isFired) {
             missile.x += missile.speed;
 
             if (missile.x > canvas.width) {
-                missiles.splice(i, 1);
+                missilesA.splice(i, 1);
+                i--;
+            }
+        }
+    }
+}
+
+function updateMissilesB() {
+    for (let i = 0; i < missilesB.length; i++) {
+        const missileB = missilesB[i];
+
+        if (missileB.isFired) {
+            missileB.x -= missileB.speed;
+
+            if (missileB.x < 0) {
+                missilesB.splice(i, 1);
                 i--;
             }
         }
@@ -229,7 +267,7 @@ function updateMeteorites() {
     }
 
     // Calculate the number of meteorites based on the player's score
-    const numMeteorites = Math.floor(score / 20) + 2; // +1 ensures there's always at least 2 meteorites
+    const numMeteorites = Math.floor(score / 100) + 2; // +1 ensures there's always at least 2 meteorites
 
     // Create new meteorites with a dynamically adjusted interval for meteorite A
     if (canCreateMeteoriteA) {
@@ -260,10 +298,70 @@ function updateMeteorites() {
     }
 }
 
-function drawMissiles() {
-    for (const missile of missiles) {
+function updateEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+        let targetY = spaceship.y + spaceship.height / 2;
+
+        // Check if there's more than one enemy and adjust their positions
+        if (enemies.length > 1) {
+            const index = enemies.indexOf(enemy);
+            const spacing = enemy.height * 1.5; // Adjust the spacing as needed
+            targetY = targetY - (spacing * (enemies.length - 1) / 2) + (index * spacing);
+        }
+
+        const enemyYCenter = enemy.y + enemy.height / 2;
+
+        if (targetY < enemyYCenter) {
+            enemy.y -= enemy.speed;
+        } else if (targetY > enemyYCenter) {
+            enemy.y += enemy.speed;
+        }
+
+        // Check if enemy is out of bounds on the left
+        if (enemy.x + enemy.width > canvas.width - 50) {
+            enemy.x -= enemy.speed;
+        } else {
+            enemy.x += enemy.speed;
+        }
+
+        // Check if it's time for the enemy to fire missile B
+        const currentTime = Date.now();
+        if (currentTime - enemy.lastMissileBFiredTime > 5000) { // 5000 milliseconds (5 seconds) cooldown
+            missilesB.push({
+                x: enemy.x,
+                y: enemy.y + enemy.height / 2 - 7,
+                width: 40,
+                height: 16,
+                speed: 5,
+                isFired: true,
+            });
+
+            enemy.lastMissileBFiredTime = currentTime;
+        }
+    }
+
+    // Create a new enemy every 10 seconds
+    const currentTime = Date.now();
+    if (currentTime - lastEnemyCreationTime > 10000) {
+        createEnemy();
+        lastEnemyCreationTime = currentTime;
+    }
+}
+
+
+function drawMissilesA() {
+    for (const missile of missilesA) {
         if (missile.isFired) {
-            ctx.drawImage(missileImage, missile.x, missile.y, missile.width, missile.height);
+            ctx.drawImage(missileAImage, missile.x, missile.y, missile.width, missile.height);
+        }
+    }
+}
+
+function drawMissilesB() {
+    for (const missileB of missilesB) {
+        if (missileB.isFired) {
+            ctx.drawImage(missileBImage, missileB.x, missileB.y, missileB.width, missileB.height);
         }
     }
 }
@@ -322,11 +420,24 @@ function drawExplosion() {
     }
 }
 
+function drawEnemies() {
+    for (const enemy of enemies) {
+        ctx.drawImage(
+            enemy.image,
+            enemy.x,
+            enemy.y,
+            enemy.width,
+            enemy.height
+        );
+    }
+}
+
 function resetFireCooldown() {
     canFireMissile = true;
 }
 
 function checkCollisions() {
+    // Check for collisions with meteorites
     for (let i = 0; i < meteorites.length; i++) {
         const meteorite = meteorites[i];
 
@@ -344,11 +455,49 @@ function checkCollisions() {
             return;
         }
     }
+
+    // Check for collisions with enemy missiles B
+    for (let i = 0; i < missilesB.length; i++) {
+        const missileB = missilesB[i];
+
+        // Check if an enemy missile B collides with the spaceship
+        if (
+            spaceship.x < missileB.x + missileB.width &&
+            spaceship.x + spaceship.width > missileB.x &&
+            spaceship.y < missileB.y + missileB.height &&
+            spaceship.y + spaceship.height > missileB.y
+        ) {
+            // Add the explosion to the explosions array with a timestamp
+            explosions.push({ x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now() });
+            // Collision detected, stop the game
+            setTimeout(() => {gameOver();}, 250);
+            return;
+        }
+    }
+
+    // Check for collisions with enemies
+    for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+
+        // Check if an enemy collides with the spaceship
+        if (
+            spaceship.x < enemy.x + enemy.width &&
+            spaceship.x + spaceship.width > enemy.x &&
+            spaceship.y < enemy.y + enemy.height &&
+            spaceship.y + spaceship.height > enemy.y
+        ) {
+            // Add the explosion to the explosions array with a timestamp
+            explosions.push({ x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now() });
+            // Collision detected, stop the game
+            setTimeout(() => {gameOver();}, 250);
+            return;
+        }
+    }
 }
 
 function checkMissileMeteoriteCollisions() {
-    for (let i = 0; i < missiles.length; i++) {
-        const missile = missiles[i];
+    for (let i = 0; i < missilesA.length; i++) {
+        const missile = missilesA[i];
 
         for (let j = 0; j < meteorites.length; j++) {
             const meteorite = meteorites[j];
@@ -363,7 +512,7 @@ function checkMissileMeteoriteCollisions() {
                 // Add the explosion to the explosions array with a timestamp
                 explosions.push({ x: missile.x, y: missile.y - 40, timestamp: Date.now() });
 
-                missiles.splice(i, 1);
+                missilesA.splice(i, 1);
                 i--;
 
                 // Reduce the meteorite's health
@@ -386,6 +535,42 @@ function checkMissileMeteoriteCollisions() {
                         default:
                             increaseScore(1);
                     }
+                }
+            }
+        }
+    }
+}
+
+function checkMissileEnemyCollisions() {
+    for (let i = 0; i < missilesA.length; i++) {
+        const missile = missilesA[i];
+
+        for (let j = 0; j < enemies.length; j++) {
+            const enemy = enemies[j];
+
+            // Check if a missile collides with an enemy
+            if (
+                missile.x < enemy.x + enemy.width &&
+                missile.x + missile.width > enemy.x &&
+                missile.y < enemy.y + enemy.height &&
+                missile.y + missile.height > enemy.y
+            ) {
+                // Add the explosion to the explosions array with a timestamp
+                explosions.push({ x: missile.x, y: missile.y - 40, timestamp: Date.now() });
+
+                missilesA.splice(i, 1);
+                i--;
+
+                // Reduce the enemy's health
+                enemy.health--;
+
+                // If health reaches 0, remove the missile and enemy
+                if (enemy.health <= 0) {
+                    enemies.splice(j, 1);
+                    j--;
+
+                    // Increase the score (adjust as needed)
+                    increaseScore(5); // You can adjust the score increment
                 }
             }
         }
@@ -427,7 +612,7 @@ function animate() {
         updateSpaceshipPosition();
 
         if (isSpacePressed && canFireMissile) {
-            missiles.push({
+            missilesA.push({
                 x: spaceship.x + spaceship.width,
                 y: spaceship.y + spaceship.height / 2 - 7,
                 width: 40,
@@ -440,13 +625,18 @@ function animate() {
             setTimeout(resetFireCooldown, 125);
         }
 
-        updateMissiles();
+        updateMissilesA();
+        updateMissilesB();
         updateMeteorites();
+        updateEnemies();
         drawSpaceship();
-        drawMissiles();
+        drawMissilesA();
+        drawMissilesB();
         drawMeteorites();
         drawExplosion();
+        drawEnemies();
         checkMissileMeteoriteCollisions();
+        checkMissileEnemyCollisions();
         checkCollisions(); // Check for collisions at each frame
     } else if (gameState === GameState.GAME_OVER) {
         // Display game over message and allow starting a new game
@@ -463,7 +653,8 @@ function animate() {
 function startNewGame() {
     // Reset game variables here
     meteorites = [];
-    missiles = [];
+    missilesA = [];
+    enemies = [];
     spaceship.x = 50;
     spaceship.y = 50;
     baseIntervalA = 5000; // Reset the base interval
