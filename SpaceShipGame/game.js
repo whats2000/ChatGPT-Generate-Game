@@ -130,7 +130,8 @@ function createEnemy() {
         image: enemyImage, // Use the enemy image
         speed: 0.5, // Set the speed to 0.5
         health: 5,
-        lastMissileBFiredTime: Date.now() + 1500
+        lastMissileBFiredTime: Date.now() + 1500,
+        targetY: spaceship.y
     });
 }
 
@@ -301,21 +302,17 @@ function updateMeteorites() {
 function updateEnemies() {
     for (let i = 0; i < enemies.length; i++) {
         const enemy = enemies[i];
-        let targetY = spaceship.y + spaceship.height / 2;
 
-        // Check if there's more than one enemy and adjust their positions
-        if (enemies.length > 1) {
-            const index = enemies.indexOf(enemy);
-            const spacing = enemy.height * 1.5; // Adjust the spacing as needed
-            targetY = targetY - (spacing * (enemies.length - 1) / 2) + (index * spacing);
+        // If the enemy has reached its current target, generate a new random target
+        if (Math.abs(enemy.y - enemy.targetY) < enemy.speed) {
+            enemy.targetY = Math.random() * (canvas.height - enemy.height);
         }
 
-        const enemyYCenter = enemy.y + enemy.height / 2;
-
-        if (targetY < enemyYCenter) {
-            enemy.y -= enemy.speed;
-        } else if (targetY > enemyYCenter) {
+        // Move the enemy towards its target
+        if (enemy.y < enemy.targetY) {
             enemy.y += enemy.speed;
+        } else if (enemy.y > enemy.targetY) {
+            enemy.y -= enemy.speed;
         }
 
         // Check if enemy is out of bounds on the left
@@ -327,7 +324,7 @@ function updateEnemies() {
 
         // Check if it's time for the enemy to fire missile B
         const currentTime = Date.now();
-        if (currentTime - enemy.lastMissileBFiredTime > 5000) { // 5000 milliseconds (5 seconds) cooldown
+        if (currentTime - enemy.lastMissileBFiredTime > 3000) { // 3000 milliseconds (3 seconds) cooldown
             missilesB.push({
                 x: enemy.x,
                 y: enemy.y + enemy.height / 2 - 7,
@@ -348,7 +345,6 @@ function updateEnemies() {
         lastEnemyCreationTime = currentTime;
     }
 }
-
 
 function drawMissilesA() {
     for (const missile of missilesA) {
