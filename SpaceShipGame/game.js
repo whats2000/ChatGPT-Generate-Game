@@ -337,8 +337,10 @@ function checkCollisions() {
             spaceship.y < meteorite.y + meteorite.height &&
             spaceship.y + spaceship.height > meteorite.y
         ) {
+            // Add the explosion to the explosions array with a timestamp
+            explosions.push({ x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now() });
             // Collision detected, stop the game
-            gameOver();
+            setTimeout(() => {gameOver();}, 250);
             return;
         }
     }
