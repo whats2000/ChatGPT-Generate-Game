@@ -177,6 +177,15 @@ document.addEventListener("keyup", function (event) {
     }
 });
 
+// Check for Enter key press to start the game
+document.addEventListener("keydown", function (event) {
+    if (gameState === GameState.PLAYING) return;
+    if (event.key === "Enter") {
+        gameState = GameState.PLAYING;
+        startNewGame();
+    }
+});
+
 function increaseScore(num) {
     score += num; // Adjust the score increment as needed
     scoreboard.textContent = "Score: " + score;
@@ -445,9 +454,11 @@ function checkCollisions() {
             spaceship.y + spaceship.height > meteorite.y
         ) {
             // Add the explosion to the explosions array with a timestamp
-            explosions.push({ x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now() });
+            explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
             // Collision detected, stop the game
-            setTimeout(() => {gameOver();}, 250);
+            setTimeout(() => {
+                gameOver();
+            }, 250);
             return;
         }
     }
@@ -464,9 +475,11 @@ function checkCollisions() {
             spaceship.y + spaceship.height > missileB.y
         ) {
             // Add the explosion to the explosions array with a timestamp
-            explosions.push({ x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now() });
+            explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
             // Collision detected, stop the game
-            setTimeout(() => {gameOver();}, 250);
+            setTimeout(() => {
+                gameOver();
+            }, 250);
             return;
         }
     }
@@ -483,9 +496,11 @@ function checkCollisions() {
             spaceship.y + spaceship.height > enemy.y
         ) {
             // Add the explosion to the explosions array with a timestamp
-            explosions.push({ x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now() });
+            explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
             // Collision detected, stop the game
-            setTimeout(() => {gameOver();}, 250);
+            setTimeout(() => {
+                gameOver();
+            }, 250);
             return;
         }
     }
@@ -494,42 +509,45 @@ function checkCollisions() {
 function checkMissileMeteoriteCollisions() {
     for (let i = 0; i < missilesA.length; i++) {
         const missile = missilesA[i];
+        if (!missile) continue;
 
-        for (let j = 0; j < meteorites.length; j++) {
-            const meteorite = meteorites[j];
+        if (meteorites.length > 0) {
+            for (let j = 0; j < meteorites.length; j++) {
+                const meteorite = meteorites[j];
 
-            // Check if a missile collides with a meteorite
-            if (
-                missile.x < meteorite.x + meteorite.width &&
-                missile.x + missile.width > meteorite.x &&
-                missile.y < meteorite.y + meteorite.height &&
-                missile.y + missile.height > meteorite.y
-            ) {
-                // Add the explosion to the explosions array with a timestamp
-                explosions.push({ x: missile.x, y: missile.y - 40, timestamp: Date.now() });
+                // Check if a missile collides with a meteorite
+                if (
+                    missile.x < meteorite.x + meteorite.width &&
+                    missile.x + missile.width > meteorite.x &&
+                    missile.y < meteorite.y + meteorite.height &&
+                    missile.y + missile.height > meteorite.y
+                ) {
+                    // Add the explosion to the explosions array with a timestamp
+                    explosions.push({x: missile.x, y: missile.y - 40, timestamp: Date.now()});
 
-                missilesA.splice(i, 1);
-                i--;
+                    missilesA.splice(i, 1);
+                    i--;
 
-                // Reduce the meteorite's health
-                meteorite.health--;
+                    // Reduce the meteorite's health
+                    meteorite.health--;
 
-                // If health reaches 0, remove the missile and meteorite
-                if (meteorite.health <= 0) {
+                    // If health reaches 0, remove the missile and meteorite
+                    if (meteorite.health <= 0) {
 
-                    meteorites.splice(j, 1);
-                    j--;
+                        meteorites.splice(j, 1);
+                        j--;
 
-                    // Increase the score
-                    switch (meteorite.image) {
-                        case meteoriteAImage:
-                            increaseScore(1);
-                            break;
-                        case meteoriteBImage:
-                            increaseScore(3);
-                            break;
-                        default:
-                            increaseScore(1);
+                        // Increase the score
+                        switch (meteorite.image) {
+                            case meteoriteAImage:
+                                increaseScore(1);
+                                break;
+                            case meteoriteBImage:
+                                increaseScore(3);
+                                break;
+                            default:
+                                increaseScore(1);
+                        }
                     }
                 }
             }
@@ -540,6 +558,7 @@ function checkMissileMeteoriteCollisions() {
 function checkMissileEnemyCollisions() {
     for (let i = 0; i < missilesA.length; i++) {
         const missile = missilesA[i];
+        if (!missile) continue;
 
         for (let j = 0; j < enemies.length; j++) {
             const enemy = enemies[j];
@@ -552,7 +571,7 @@ function checkMissileEnemyCollisions() {
                 missile.y + missile.height > enemy.y
             ) {
                 // Add the explosion to the explosions array with a timestamp
-                explosions.push({ x: missile.x, y: missile.y - 40, timestamp: Date.now() });
+                explosions.push({x: missile.x, y: missile.y - 40, timestamp: Date.now()});
 
                 missilesA.splice(i, 1);
                 i--;
@@ -595,14 +614,6 @@ function animate() {
         ctx.fillStyle = "white";
         ctx.font = "36px Arial";
         ctx.fillText("Press Enter to Start", canvas.width / 2 - 160, canvas.height / 2);
-
-        // Check for Enter key press to start the game
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                gameState = GameState.PLAYING;
-                startNewGame();
-            }
-        });
     } else if (gameState === GameState.PLAYING) {
         // Game logic when playing
         updateSpaceshipPosition();
@@ -650,11 +661,13 @@ function startNewGame() {
     // Reset game variables here
     meteorites = [];
     missilesA = [];
+    missilesB = [];
     enemies = [];
     spaceship.x = 50;
     spaceship.y = 50;
     baseIntervalA = 5000; // Reset the base interval
     canCreateMeteoriteA = true;
+    canCreateMeteoriteB = true;
     canFireMissile = true;
     gameStartTime = Date.now();
 
