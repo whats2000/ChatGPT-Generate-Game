@@ -730,6 +730,8 @@ function gameOver() {
     ctx.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
 
     // Optionally, you can reset other game variables or perform other actions here.
+    canCreateMeteoriteA = false;
+    canCreateMeteoriteB = false;
 }
 
 function animate() {
@@ -808,7 +810,8 @@ function startNewGame() {
     enemies = [];
     spaceship.x = 50;
     spaceship.y = 50;
-    baseIntervalA = 5000; // Reset the base interval
+    baseIntervalA = 2500; // Reset the base interval
+    baseIntervalB = 5000;
     canCreateMeteoriteA = true;
     canCreateMeteoriteB = true;
     canFireMissile = true;
