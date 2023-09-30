@@ -87,8 +87,8 @@ let firePerSecond = 5;
 
 let baseIntervalA = 2500; // Initial base interval in milliseconds
 let baseIntervalB = 5000; // Initial base interval in milliseconds
-let canCreateMeteoriteA = true;
-let canCreateMeteoriteB = true;
+let lastCreateMeteoriteTimeA = 0;
+let lastCreateMeteoriteTimeB = 0;
 
 const scoreboard = document.getElementById("scoreboard");
 const shieldElement = document.getElementById("shield");
@@ -388,35 +388,27 @@ function updateMeteorites() {
         }
     }
 
+    // Calculate the time elapsed since the last meteorite creation
+    const timeElapsedA = Date.now() - lastCreateMeteoriteTimeA;
+    const timeElapsedB = Date.now() - lastCreateMeteoriteTimeB;
+
     // Calculate the number of meteorites based on the player's score
     const numMeteorites = Math.floor(score / 100) + 2; // +1 ensures there's always at least 2 meteorites
 
-    // Create new meteorites with a dynamically adjusted interval for meteorite A
-    if (canCreateMeteoriteA) {
-        let randomInterval = baseIntervalA + Math.random() * (baseIntervalA - 200 * Math.floor(score / 10)); // Random interval within the baseInterval range
-        randomInterval = randomInterval > 1000 ? randomInterval : 1000; // Ensure a minimum interval of 1000ms
-        setTimeout(function () {
-            for (let j = 0; j < numMeteorites; j++) {
-                createMeteoriteA();
-            }
-            canCreateMeteoriteA = true;
-        }, randomInterval);
-
-        canCreateMeteoriteA = false;
+    // Create new meteorites with dynamically adjusted intervals for meteorite A
+    if (timeElapsedA >= baseIntervalA) {
+        for (let j = 0; j < numMeteorites; j++) {
+            createMeteoriteA();
+        }
+        lastCreateMeteoriteTimeA = Date.now();
     }
 
-    // Create new meteorites with a dynamically adjusted interval for meteorite B
-    if (canCreateMeteoriteB) {
-        let randomInterval = baseIntervalB + Math.random() * (baseIntervalB - 200 * Math.floor(score / 10)); // Random interval within the baseInterval range
-        randomInterval = randomInterval > 1000 ? randomInterval : 1000; // Ensure a minimum interval of 1000ms
-        setTimeout(function () {
-            for (let j = 0; j < numMeteorites; j++) {
-                createMeteoriteB();
-            }
-            canCreateMeteoriteB = true;
-        }, randomInterval);
-
-        canCreateMeteoriteB = false;
+    // Create new meteorites with dynamically adjusted intervals for meteorite B
+    if (timeElapsedB >= baseIntervalB) {
+        for (let j = 0; j < numMeteorites; j++) {
+            createMeteoriteB();
+        }
+        lastCreateMeteoriteTimeB = Date.now();
     }
 }
 
@@ -730,8 +722,6 @@ function gameOver() {
     ctx.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
 
     // Optionally, you can reset other game variables or perform other actions here.
-    canCreateMeteoriteA = false;
-    canCreateMeteoriteB = false;
 }
 
 function animate() {
@@ -812,10 +802,12 @@ function startNewGame() {
     spaceship.y = 50;
     baseIntervalA = 2500; // Reset the base interval
     baseIntervalB = 5000;
-    canCreateMeteoriteA = true;
-    canCreateMeteoriteB = true;
     canFireMissile = true;
     gameStartTime = Date.now();
+
+    lastCreateMeteoriteTimeA = gameStartTime + baseIntervalA;
+    lastCreateMeteoriteTimeB = gameStartTime + baseIntervalB;
+    lastEnemyCreationTime = gameStartTime;
 
     // Reset the score to 0
     score = 0;
