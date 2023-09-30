@@ -29,6 +29,29 @@ explosionImage.src = "static/images/Explosion.png"; // Path to the explosion ima
 const enemyImage = new Image();
 enemyImage.src = "static/images/SpacePirateShip.png"; // Path to the enemy image
 
+const missileLaunchSound = new Howl({
+    src: ['static/sound/MissileLaunch.mp3']
+});
+
+const explosionSoundA = new Howl({
+    src: ['static/sound/ExplosionA.mp3']
+});
+
+const explosionSoundB = new Howl({
+    src: ['static/sound/ExplosionB.mp3']
+});
+
+const playerCrash = new Howl({
+    src: ['static/sound/PlayerCrash.mp3']
+});
+
+// Music by <a href="https://pixabay.com/users/music_unlimited-27600023/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280">Music Unlimited</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280">Pixabay</a>
+// Load the background music
+const backgroundMusic = new Howl({
+    src: ['static/sound/BackgroundMusic.mp3'],
+    loop: true, // Set the loop property to true to make it loop
+});
+
 const spaceship = {
     x: 50,
     y: 50,
@@ -53,6 +76,7 @@ let canFireMissile = true;
 let animationFrame;
 let score = 0;
 let gameStartTime = 0;
+let firePerSecond = 5;
 
 let baseIntervalA = 2500; // Initial base interval in milliseconds
 let baseIntervalB = 5000; // Initial base interval in milliseconds
@@ -455,6 +479,7 @@ function checkCollisions() {
         ) {
             // Add the explosion to the explosions array with a timestamp
             explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
+            playerCrash.play(undefined, true);
             // Collision detected, stop the game
             setTimeout(() => {
                 gameOver();
@@ -476,6 +501,7 @@ function checkCollisions() {
         ) {
             // Add the explosion to the explosions array with a timestamp
             explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
+            playerCrash.play(undefined, true);
             // Collision detected, stop the game
             setTimeout(() => {
                 gameOver();
@@ -497,6 +523,7 @@ function checkCollisions() {
         ) {
             // Add the explosion to the explosions array with a timestamp
             explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
+            playerCrash.play(undefined, true);
             // Collision detected, stop the game
             setTimeout(() => {
                 gameOver();
@@ -524,6 +551,7 @@ function checkMissileMeteoriteCollisions() {
                 ) {
                     // Add the explosion to the explosions array with a timestamp
                     explosions.push({x: missile.x, y: missile.y - 40, timestamp: Date.now()});
+                    explosionSoundB.play(undefined, true);
 
                     missilesA.splice(i, 1);
                     i--;
@@ -572,6 +600,7 @@ function checkMissileEnemyCollisions() {
             ) {
                 // Add the explosion to the explosions array with a timestamp
                 explosions.push({x: missile.x, y: missile.y - 40, timestamp: Date.now()});
+                explosionSoundA.play(undefined, true);
 
                 missilesA.splice(i, 1);
                 i--;
@@ -627,9 +656,9 @@ function animate() {
                 speed: 5,
                 isFired: true,
             });
-
+            missileLaunchSound.play(undefined, true);
             canFireMissile = false;
-            setTimeout(resetFireCooldown, 125);
+            setTimeout(resetFireCooldown, 1000 / firePerSecond);
         }
 
         updateMissilesA();
@@ -658,6 +687,10 @@ function animate() {
 }
 
 function startNewGame() {
+    backgroundMusic.stop(undefined, true);
+    // Start playing the background music
+    backgroundMusic.play(undefined, true);
+
     // Reset game variables here
     meteorites = [];
     missilesA = [];
