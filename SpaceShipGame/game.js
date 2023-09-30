@@ -29,8 +29,15 @@ explosionImage.src = "static/images/Explosion.png"; // Path to the explosion ima
 const enemyImage = new Image();
 enemyImage.src = "static/images/SpacePirateShip.png"; // Path to the enemy image
 
-const missileLaunchSound = new Howl({
-    src: ['static/sound/MissileLaunch.mp3']
+const shieldImage = new Image();
+shieldImage.src = "static/images/shield.png"; // Path to the shield image
+
+const missileLaunchSoundA = new Howl({
+    src: ['static/sound/MissileLaunchA.mp3']
+});
+
+const missileLaunchSoundB = new Howl({
+    src: ['static/sound/MissileLaunchB.mp3']
 });
 
 const explosionSoundA = new Howl({
@@ -84,6 +91,7 @@ let canCreateMeteoriteA = true;
 let canCreateMeteoriteB = true;
 
 const scoreboard = document.getElementById("scoreboard");
+const shieldElement = document.getElementById("shield");
 
 const GameState = {
     START: "start",
@@ -92,6 +100,63 @@ const GameState = {
 };
 
 let gameState = GameState.START; // Initialize the game state
+
+// Define shield-related variables
+let shieldActive = false; // Use a boolean to track the shield's state
+let shieldEnergy = 100; // Initial shield energy
+const maxShieldEnergy = 100;
+const shieldEnergyCostPerSecond = 4; // Energy cost when the shield is active
+let lastShieldActivationTime = 0;
+let lastShieldEnergyRechargeTime = 0;
+
+// Function to toggle the shield
+function toggleShield() {
+    if (shieldEnergy >= shieldEnergyCostPerSecond) {
+        // Activate the shield if there's enough energy
+        shieldActive = true;
+        lastShieldActivationTime = Date.now();
+    }
+}
+
+// Function to recharge the shield energy
+function rechargeShield(amount) {
+    if (shieldEnergy < maxShieldEnergy) {
+        shieldEnergy = Math.min(shieldEnergy + amount, maxShieldEnergy);
+    }
+}
+
+// Function to update the shield system
+function updateShield() {
+    if (shieldActive) {
+        // Calculate the time elapsed since the last update
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - lastShieldActivationTime;
+
+        // Calculate the energy cost for the elapsed time
+        const energyCost = (elapsedTime / 1000) * shieldEnergyCostPerSecond;
+
+        // Check if there's enough energy to sustain the shield
+        if (shieldEnergy >= energyCost) {
+            // Deduct the energy cost
+            shieldEnergy -= energyCost;
+            lastShieldActivationTime = currentTime;
+        } else {
+            // Deactivate the shield if there's not enough energy
+            shieldActive = false;
+        }
+    } else {
+        // Implement shield energy recharge mechanism here
+        // Recharge the shield 1 point every 1 second
+        const currentTime = Date.now();
+        if (currentTime - lastShieldEnergyRechargeTime >= 1000) {
+            rechargeShield(1);
+            lastShieldEnergyRechargeTime = currentTime;
+        }
+    }
+
+    // Update the shield energy display in the HTML
+    shieldElement.textContent = "Shield Energy: " + Math.floor(shieldEnergy);
+}
 
 function playBackgroundMusic() {
     backgroundMusic.play(undefined, true);
@@ -215,6 +280,21 @@ document.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
         gameState = GameState.PLAYING;
         startNewGame();
+    }
+});
+
+// Event listener for "Shift" keydown
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Shift") {
+        toggleShield();
+    }
+});
+
+// Event listener for "Shift" keyup
+document.addEventListener("keyup", function (event) {
+    if (event.key === "Shift") {
+        // Deactivate the shield when "Shift" key is released
+        shieldActive = false;
     }
 });
 
@@ -374,7 +454,7 @@ function updateEnemies() {
                 speed: 5,
                 isFired: true,
             });
-
+            missileLaunchSoundB.play(undefined, true);
             enemy.lastMissileBFiredTime = currentTime;
         }
     }
@@ -469,11 +549,18 @@ function drawEnemies() {
     }
 }
 
+function drawShield() {
+    if (shieldActive) {
+        ctx.drawImage(shieldImage, spaceship.x - 15, spaceship.y - 25, spaceship.width + 30, spaceship.height + 50);
+    }
+}
+
 function resetFireCooldown() {
     canFireMissile = true;
 }
 
 function checkCollisions() {
+    if (shieldActive) return; // Skip collisions when the shield is active
     // Check for collisions with meteorites
     for (let i = 0; i < meteorites.length; i++) {
         const meteorite = meteorites[i];
@@ -623,6 +710,7 @@ function checkMissileEnemyCollisions() {
 
                     // Increase the score (adjust as needed)
                     increaseScore(5); // You can adjust the score increment
+                    rechargeShield(10);
                 }
             }
         }
@@ -673,7 +761,7 @@ function animate() {
                     speed: 5,
                     isFired: true,
                 });
-                missileLaunchSound.play(undefined, true);
+                missileLaunchSoundA.play(undefined, true);
                 canFireMissile = false;
                 setTimeout(resetFireCooldown, 1000 / firePerSecond);
             }
@@ -682,12 +770,14 @@ function animate() {
             updateMissilesB();
             updateMeteorites();
             updateEnemies();
+            updateShield();
             drawSpaceship();
             drawMissilesA();
             drawMissilesB();
             drawMeteorites();
             drawExplosion();
             drawEnemies();
+            drawShield();
             checkMissileMeteoriteCollisions();
             checkMissileEnemyCollisions();
             checkCollisions(); // Check for collisions at each frame
@@ -726,6 +816,9 @@ function startNewGame() {
 
     // Reset the score to 0
     score = 0;
+
+    // Reset the Shield Energy to 100
+    shieldEnergy = 100;
 
     // Update the scoreboard display
     scoreboard.textContent = "Score: " + score;
