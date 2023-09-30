@@ -82,16 +82,33 @@ canvas {
     font-size: 10px; /* Font size for reference paragraphs */
     margin-top: 5px; /* Add some spacing between reference paragraphs */
 }
+
 /* Define a keyframes animation for rainbow color */
 @keyframes rainbow {
-    0% { color: red; }
-    14% { color: orange; }
-    28% { color: yellow; }
-    42% { color: green; }
-    57% { color: blue; }
-    71% { color: indigo; }
-    85% { color: violet; }
-    100% { color: red; }
+    0% {
+        color: red;
+    }
+    14% {
+        color: orange;
+    }
+    28% {
+        color: yellow;
+    }
+    42% {
+        color: green;
+    }
+    57% {
+        color: blue;
+    }
+    71% {
+        color: indigo;
+    }
+    85% {
+        color: violet;
+    }
+    100% {
+        color: red;
+    }
 }
 
 /* Apply the rainbow animation to elements with class "keyboard" */
