@@ -3,34 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Space Ship Game</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            /* <a href="https://www.freepik.com/free-photo/ultra-detailed-nebula-abstract-wallpaper-4_39994508.htm#query=space&position=4&from_view=keyword&track=sph">Image by Vaynakh</a> on Freepik*/
-            background-image: url("static/images/Background.jpg"); /* Set the background image */
-            background-size: cover; /* Cover the entire viewport */
-        }
-        canvas {
-            display: block;
-        }
-        #scoreboard {
-            position: absolute;
-            top: 5%;
-            left: 5%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 36px; /* Adjust the font size as needed */
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.min.js"></script>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
+<div class="instructions" id="instructions">
+    <h1>Welcome to the Space Shooter Game !</h1>
+    <p>Use Arrow Keys to Move the Spaceship</p>
+    <p>Press Space Bar to Fire Missiles</p>
+    <p>Avoid Meteorites and Enemy Ships</p>
+    <h2 class="start-button">Press Enter to Start</h2>
+    <p class="reference">
+        Background image by <a href="https://www.freepik.com/free-photo/ultra-detailed-nebula-abstract-wallpaper-4_39994508.htm#query=space&position=4&from_view=keyword&track=sph" target="_blank" rel="noopener noreferrer">Vaynakh on Freepik</a>
+    </p>
+    <p class="reference">
+        Music by <a href="https://pixabay.com/users/music_unlimited-27600023/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280" target="_blank" rel="noopener noreferrer">Music Unlimited</a> from <a href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280" target="_blank" rel="noopener noreferrer">Pixabay</a>
+    </p>
+</div>
 <div id="scoreboard">Score: 0</div>
-<a href="https://www.freepik.com/free-photo/ultra-detailed-nebula-abstract-wallpaper-4_39994508.htm#query=space&position=4&from_view=keyword&track=sph">Image by Vaynakh on Freepik</a>
-<a href="https://pixabay.com/users/music_unlimited-27600023/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280">Music Unlimited</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280">Pixabay</a>
 <script src="game.js"></script>
 </body>
 </html>
+
+

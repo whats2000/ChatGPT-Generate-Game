@@ -93,6 +93,14 @@ const GameState = {
 
 let gameState = GameState.START; // Initialize the game state
 
+function playBackgroundMusic() {
+    backgroundMusic.play(undefined, true);
+}
+
+function stopBackgroundMusic() {
+    backgroundMusic.stop(undefined, true);
+}
+
 function createMeteoriteA() {
     const minY = 0; // The minimum y-position (top of the canvas)
     const maxY = canvas.height - 50; // The maximum y-position (adjust the height as needed)
@@ -638,58 +646,70 @@ function gameOver() {
 
 function animate() {
     if (gameState === GameState.START) {
-        // Display a start message
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "white";
-        ctx.font = "36px Arial";
-        ctx.fillText("Press Enter to Start", canvas.width / 2 - 160, canvas.height / 2);
-    } else if (gameState === GameState.PLAYING) {
-        // Game logic when playing
-        updateSpaceshipPosition();
+        // Display the instructions div
+        const instructionsDiv = document.getElementById("instructions");
+        instructionsDiv.style.display = "block";
 
-        if (isSpacePressed && canFireMissile) {
-            missilesA.push({
-                x: spaceship.x + spaceship.width,
-                y: spaceship.y + spaceship.height / 2 - 7,
-                width: 40,
-                height: 16,
-                speed: 5,
-                isFired: true,
-            });
-            missileLaunchSound.play(undefined, true);
-            canFireMissile = false;
-            setTimeout(resetFireCooldown, 1000 / firePerSecond);
+        // Hide the canvas
+        canvas.style.display = "none";
+    } else {
+        // Hide the instructions div when not in START state
+        const instructionsDiv = document.getElementById("instructions");
+        instructionsDiv.style.display = "none";
+
+        // Show the canvas
+        canvas.style.display = "block";
+
+        if (gameState === GameState.PLAYING) {
+            // Game logic when playing
+            updateSpaceshipPosition();
+
+            if (isSpacePressed && canFireMissile) {
+                missilesA.push({
+                    x: spaceship.x + spaceship.width,
+                    y: spaceship.y + spaceship.height / 2 - 7,
+                    width: 40,
+                    height: 16,
+                    speed: 5,
+                    isFired: true,
+                });
+                missileLaunchSound.play(undefined, true);
+                canFireMissile = false;
+                setTimeout(resetFireCooldown, 1000 / firePerSecond);
+            }
+
+            updateMissilesA();
+            updateMissilesB();
+            updateMeteorites();
+            updateEnemies();
+            drawSpaceship();
+            drawMissilesA();
+            drawMissilesB();
+            drawMeteorites();
+            drawExplosion();
+            drawEnemies();
+            checkMissileMeteoriteCollisions();
+            checkMissileEnemyCollisions();
+            checkCollisions(); // Check for collisions at each frame
+        } else if (gameState === GameState.GAME_OVER) {
+            // Display game over message and allow starting a new game
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.font = "36px Arial";
+            ctx.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
+            ctx.fillText("Press Enter to Start a New Game", canvas.width / 2 - 250, canvas.height / 2 + 40);
         }
-
-        updateMissilesA();
-        updateMissilesB();
-        updateMeteorites();
-        updateEnemies();
-        drawSpaceship();
-        drawMissilesA();
-        drawMissilesB();
-        drawMeteorites();
-        drawExplosion();
-        drawEnemies();
-        checkMissileMeteoriteCollisions();
-        checkMissileEnemyCollisions();
-        checkCollisions(); // Check for collisions at each frame
-    } else if (gameState === GameState.GAME_OVER) {
-        // Display game over message and allow starting a new game
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "white";
-        ctx.font = "36px Arial";
-        ctx.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
-        ctx.fillText("Press Enter to Start a New Game", canvas.width / 2 - 250, canvas.height / 2 + 40);
     }
 
     animationFrame = requestAnimationFrame(animate);
 }
 
 function startNewGame() {
-    backgroundMusic.stop(undefined, true);
+    // Stop any previously playing background music
+    stopBackgroundMusic();
+
     // Start playing the background music
-    backgroundMusic.play(undefined, true);
+    playBackgroundMusic();
 
     // Reset game variables here
     meteorites = [];
