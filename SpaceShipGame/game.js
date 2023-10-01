@@ -48,6 +48,10 @@ const explosionSoundB = new Howl({
     src: ['static/sound/ExplosionB.mp3']
 });
 
+const shieldActiveSound = new Howl({
+    src: ['static/sound/ShieldActive.mp3']
+});
+
 const playerCrash = new Howl({
     src: ['static/sound/PlayerCrash.mp3']
 });
@@ -83,7 +87,8 @@ let canFireMissile = true;
 let animationFrame;
 let score = 0;
 let gameStartTime = 0;
-let firePerSecond = 5;
+let firePerSecond = 3;
+const MaxFireRate = 12;
 
 let baseIntervalA = 2500; // Initial base interval in milliseconds
 let baseIntervalB = 5000; // Initial base interval in milliseconds
@@ -97,6 +102,7 @@ const GameState = {
     START: "start",
     PLAYING: "playing",
     GAME_OVER: "gameOver",
+    PAUSED: "paused",
 };
 
 let gameState = GameState.START; // Initialize the game state
@@ -105,13 +111,18 @@ let gameState = GameState.START; // Initialize the game state
 let shieldActive = false; // Use a boolean to track the shield's state
 let shieldEnergy = 100; // Initial shield energy
 const maxShieldEnergy = 100;
-const shieldEnergyCostPerSecond = 4; // Energy cost when the shield is active
+const ShieldEnergyCostPerSecond = 10; // Energy cost when the shield is active
+let shieldCostEfficiency = 1;
+const MaxShieldEfficiency = 10;
 let lastShieldActivationTime = 0;
 let lastShieldEnergyRechargeTime = 0;
 
 // Function to toggle the shield
 function toggleShield() {
-    if (shieldEnergy >= shieldEnergyCostPerSecond) {
+    if (!shieldActive) {
+        shieldActiveSound.play(undefined, true);
+    }
+    if (shieldEnergy >= ShieldEnergyCostPerSecond) {
         // Activate the shield if there's enough energy
         shieldActive = true;
         lastShieldActivationTime = Date.now();
@@ -127,13 +138,12 @@ function rechargeShield(amount) {
 
 // Function to update the shield system
 function updateShield() {
-    if (shieldActive) {
-        // Calculate the time elapsed since the last update
-        const currentTime = Date.now();
-        const elapsedTime = currentTime - lastShieldActivationTime;
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - lastShieldActivationTime;
 
-        // Calculate the energy cost for the elapsed time
-        const energyCost = (elapsedTime / 1000) * shieldEnergyCostPerSecond;
+    if (shieldActive) {
+        // Calculate the energy cost for the elapsed time with efficiency factor
+        const energyCost = (elapsedTime / 1000) * (ShieldEnergyCostPerSecond / shieldCostEfficiency);
 
         // Check if there's enough energy to sustain the shield
         if (shieldEnergy >= energyCost) {
@@ -147,7 +157,6 @@ function updateShield() {
     } else {
         // Implement shield energy recharge mechanism here
         // Recharge the shield 1 point every 1 second
-        const currentTime = Date.now();
         if (currentTime - lastShieldEnergyRechargeTime >= 1000) {
             rechargeShield(1);
             lastShieldEnergyRechargeTime = currentTime;
@@ -184,6 +193,25 @@ function createMeteoriteA() {
         isExploding: false, // Add this property
         explosionTime: 0,   // Add this property
     });
+}
+
+// Function to update the progress bar by adding 30px to its current width
+function updateProgressBar(progressBar, currentWidth) {
+    // Increase the width of the progress bar by 30px plus the current width
+    const newWidth = currentWidth + 30;
+    progressBar.style.width = `${newWidth}px`;
+}
+
+function updateDisplay(element, value) {
+    element.textContent = value;
+}
+
+function updateCostDisplay(costElement, cost, max) {
+    if (cost <= max) {
+        updateDisplay(costElement, `Cost: ${cost}`);
+    } else {
+        updateDisplay(costElement, `Max Level`);
+    }
 }
 
 function createMeteoriteB() {
@@ -271,6 +299,14 @@ document.addEventListener("keyup", function (event) {
         case " ":
             isSpacePressed = false;
             break;
+        case "Escape": // Handle the "Escape" key press
+            if (gameState === GameState.PLAYING) {
+                gameState = GameState.PAUSED; // Pause the game
+            } else if (gameState === GameState.PAUSED) {
+                gameState = GameState.PLAYING; // Resume the game
+                requestAnimationFrame(animate);
+            }
+            break;
     }
 });
 
@@ -278,13 +314,19 @@ document.addEventListener("keyup", function (event) {
 document.addEventListener("keydown", function (event) {
     if (gameState === GameState.PLAYING) return;
     if (event.key === "Enter") {
-        gameState = GameState.PLAYING;
-        startNewGame();
+        if (gameState !== GameState.PAUSED) {
+            gameState = GameState.PLAYING;
+            startNewGame();
+        } else {
+            gameState = GameState.PLAYING; // Resume the game
+            requestAnimationFrame(animate);
+        }
     }
 });
 
 // Event listener for "Shift" keydown
 document.addEventListener("keydown", function (event) {
+    if (gameState !== GameState.PLAYING) return;
     if (event.key === "Shift") {
         toggleShield();
     }
@@ -292,9 +334,64 @@ document.addEventListener("keydown", function (event) {
 
 // Event listener for "Shift" keyup
 document.addEventListener("keyup", function (event) {
+    if (gameState !== GameState.PLAYING) return;
     if (event.key === "Shift") {
         // Deactivate the shield when "Shift" key is released
         shieldActive = false;
+    }
+});
+
+// Add an event listener to the upgrade button
+const upgradeButton = document.getElementById('fire-rate-button');
+const fireRateProgressBar = document.getElementById('fire-rate-progress');
+const costElement = document.getElementById('fire-rate-cost');
+upgradeButton.addEventListener('click', () => {
+    // Check if the player has enough score to upgrade
+    if (score >= 10 * (firePerSecond - 2) && firePerSecond <= MaxFireRate) {
+        // Deduct 10 from the score
+        score -= 10 * (firePerSecond - 2);
+
+        // Increase the fire rate by 1
+        firePerSecond += 1;
+
+        // Update the cost display
+        updateCostDisplay(costElement, 10 * (firePerSecond - 2), 10 * (MaxFireRate - 2));
+
+        // Get the current width of the progress bar
+        const currentWidth = parseFloat(getComputedStyle(fireRateProgressBar).width);
+
+        // Call the updateProgressBar function with the current width
+        updateProgressBar(fireRateProgressBar, currentWidth);
+
+        // Update the display
+        scoreboard.textContent = "Score: " + score;
+    }
+});
+
+// Add an event listener to the shield efficiency upgrade button
+const shieldEfficiencyButton = document.getElementById('shield-efficiency-button');
+const shieldEfficiencyProgressBar = document.getElementById('shield-efficiency-progress');
+const shieldEfficiencyCostElement = document.getElementById('shield-efficiency-cost');
+shieldEfficiencyButton.addEventListener('click', () => {
+    // Check if the player has enough score to upgrade
+    if (score >= 10 * shieldCostEfficiency && shieldCostEfficiency <= MaxShieldEfficiency) {
+        // Deduct the cost from the score
+        score -= 10 * shieldCostEfficiency;
+
+        // Increase the shield cost efficiency by 1
+        shieldCostEfficiency += 1;
+
+        // Update the cost display
+        updateCostDisplay(shieldEfficiencyCostElement, 10 * shieldCostEfficiency, 10 * MaxShieldEfficiency);
+
+        // Get the current width of the progress bar
+        const currentWidth = parseFloat(getComputedStyle(shieldEfficiencyProgressBar).width);
+
+        // Call the updateProgressBar function with the current width
+        updateProgressBar(shieldEfficiencyProgressBar, currentWidth);
+
+        // Update the display
+        scoreboard.textContent = "Score: " + score;
     }
 });
 
@@ -393,7 +490,7 @@ function updateMeteorites() {
     const timeElapsedB = Date.now() - lastCreateMeteoriteTimeB;
 
     // Calculate the number of meteorites based on the player's score
-    const numMeteorites = Math.floor(score / 100) + 2; // +1 ensures there's always at least 2 meteorites
+    const numMeteorites = Math.floor(score / 20) + 2; // +1 ensures there's always at least 2 meteorites
 
     // Create new meteorites with dynamically adjusted intervals for meteorite A
     if (timeElapsedA >= baseIntervalA) {
@@ -568,9 +665,7 @@ function checkCollisions() {
             explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
             playerCrash.play(undefined, true);
             // Collision detected, stop the game
-            setTimeout(() => {
-                gameOver();
-            }, 250);
+            gameOver();
             return;
         }
     }
@@ -590,9 +685,7 @@ function checkCollisions() {
             explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
             playerCrash.play(undefined, true);
             // Collision detected, stop the game
-            setTimeout(() => {
-                gameOver();
-            }, 250);
+            gameOver();
             return;
         }
     }
@@ -612,9 +705,7 @@ function checkCollisions() {
             explosions.push({x: spaceship.x - 20, y: spaceship.y - 20, timestamp: Date.now()});
             playerCrash.play(undefined, true);
             // Collision detected, stop the game
-            setTimeout(() => {
-                gameOver();
-            }, 250);
+            gameOver();
             return;
         }
     }
@@ -712,16 +803,6 @@ function checkMissileEnemyCollisions() {
 function gameOver() {
     // Change the game state to "gameOver"
     gameState = GameState.GAME_OVER;
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Display a game over message
-    ctx.fillStyle = "white";
-    ctx.font = "36px Arial";
-    ctx.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
-
-    // Optionally, you can reset other game variables or perform other actions here.
 }
 
 function animate() {
@@ -732,6 +813,13 @@ function animate() {
 
         // Hide the canvas
         canvas.style.display = "none";
+
+        // Hide the pause block
+        const pauseBlock = document.getElementById("pause");
+        pauseBlock.style.display = "none";
+
+        const gameOverBlock = document.getElementById("gameOver");
+        gameOverBlock.style.display = "none";
     } else {
         // Hide the instructions div when not in START state
         const instructionsDiv = document.getElementById("instructions");
@@ -741,6 +829,13 @@ function animate() {
         canvas.style.display = "block";
 
         if (gameState === GameState.PLAYING) {
+            // Hide the pause block
+            const pauseBlock = document.getElementById("pause");
+            pauseBlock.style.display = "none";
+
+            const gameOverBlock = document.getElementById("gameOver");
+            gameOverBlock.style.display = "none";
+
             // Game logic when playing
             updateSpaceshipPosition();
 
@@ -774,16 +869,32 @@ function animate() {
             checkMissileEnemyCollisions();
             checkCollisions(); // Check for collisions at each frame
         } else if (gameState === GameState.GAME_OVER) {
-            // Display game over message and allow starting a new game
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "white";
-            ctx.font = "36px Arial";
-            ctx.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
-            ctx.fillText("Press Enter to Start a New Game", canvas.width / 2 - 250, canvas.height / 2 + 40);
+            // Display game over block
+            const gameOverBlock = document.getElementById("gameOver");
+            gameOverBlock.style.display = "block";
+
+            // Hide the pause block
+            const pauseBlock = document.getElementById("pause");
+            pauseBlock.style.display = "none";
+
+            if (explosions.length !== 0) {
+                drawExplosion();
+            } else {
+                setTimeout(() => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+                }, 250);
+            }
+        } else if (gameState === GameState.PAUSED) {
+            // Display the pause block when the game is paused
+            const pauseBlock = document.getElementById("pause");
+            pauseBlock.style.display = "block";
         }
     }
 
-    animationFrame = requestAnimationFrame(animate);
+    if (gameState !== GameState.PAUSED) {
+        // Request the next animation frame unless the game is paused
+        animationFrame = requestAnimationFrame(animate);
+    }
 }
 
 function startNewGame() {

@@ -13,7 +13,8 @@
     <h1>Welcome to the Space Shooter Game!</h1>
     <p>Use <span class="keyboard">'Arrow Keys'</span> to Move the Spaceship</p>
     <p>Press <span class="keyboard">'Space Bar'</span> to Fire Missiles</p>
-    <p>Press <span class="keyboard">'Shift'</span> to Activate Shield</p> <!-- Add this line for shield activation -->
+    <p>Press <span class="keyboard">'Shift'</span> to Activate Shield</p>
+    <p>Press <span class="keyboard">'ESC'</span> to Pause The Game</p>
     <p>Avoid Meteorites and Enemy Ships</p>
     <h2 class="start-button">Press Enter to Start</h2>
     <p class="reference">
@@ -28,6 +29,38 @@
             href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280"
             target="_blank" rel="noopener noreferrer">Pixabay</a>
     </p>
+</div>
+
+<div class="instructions" id="pause" style="display: none;">
+    <h1>The game is paused !</h1>
+    <h2 class="start-button">Press Enter to Continue</h2>
+</div>
+
+<div class="instructions" id="gameOver" style="display: none;">
+    <h1>Game Over !</h1>
+    <!-- Upgrade Buttons -->
+    <div class="upgrade">
+        <div class="upgrade-label">Fire Rate:</div>
+        <div class="upgrade-progress">
+            <div class="progress-bar">
+                <div id="fire-rate-progress" class="progress"></div>
+            </div>
+            <button id="fire-rate-button" class="upgrade-button">+</button>
+        </div>
+        <div id="fire-rate-cost" class="upgrade-cost">Cost: 10</div>
+    </div>
+
+    <div class="upgrade">
+        <div class="upgrade-label">Shield Cost:</div>
+        <div class="upgrade-progress">
+            <div class="progress-bar">
+                <div id="shield-efficiency-progress" class="progress"></div>
+            </div>
+            <button id="shield-efficiency-button" class="upgrade-button">+</button>
+        </div>
+        <div id="shield-efficiency-cost" class="upgrade-cost">Cost: 10</div>
+    </div>
+    <h2 class="start-button">Press Enter to Restart</h2>
 </div>
 
 <div id="score-container">

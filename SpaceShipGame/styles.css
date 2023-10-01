@@ -115,3 +115,56 @@ canvas {
 .keyboard {
     animation: rainbow 6s linear infinite;
 }
+
+/* CSS for Upgrade Buttons */
+.upgrade {
+    font-size: 24px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.upgrade-label {
+    flex: 2; /* Adjust the width as needed */
+    margin-right: 10px;
+    text-align: right;
+}
+
+.upgrade-progress {
+    flex: 3; /* Adjust the width as needed */
+    display: flex;
+    align-items: center;
+}
+
+.progress-bar {
+    flex-grow: 1;
+    height: 24px;
+    width: 300px;
+    background-color: #ccc;
+    border-radius: 5px;
+    position: relative;
+}
+
+.progress {
+    height: 100%;
+    width: 30px;
+    background-color: #4CAF50;
+    border-radius: 5px;
+}
+
+.upgrade-button {
+    margin-left: 10px;
+    padding: 0 10px;
+    height: 24px;
+    flex: 1;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.upgrade-cost {
+    width: 125px;
+    margin-left: 10px;
+}
