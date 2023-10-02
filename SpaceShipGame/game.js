@@ -916,11 +916,13 @@ function startNewGame() {
     enemies = [];
     spaceship.x = 50;
     spaceship.y = 50;
-    baseIntervalA = 2500; // Reset the base interval
-    baseIntervalB = 5000;
     canFireMissile = true;
-    gameStartTime = Date.now();
 
+    // Reset the base interval
+    baseIntervalA = 2500;
+    baseIntervalB = 5000;
+
+    gameStartTime = Date.now();
     lastCreateMeteoriteTimeA = gameStartTime + baseIntervalA;
     lastCreateMeteoriteTimeB = gameStartTime + baseIntervalB;
     lastEnemyCreationTime = gameStartTime;
