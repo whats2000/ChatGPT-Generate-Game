@@ -34,34 +34,34 @@ shieldImage.src = "static/images/shield.png"; // Path to the shield image
 
 const missileLaunchSoundA = new Howl({
     src: ['static/sound/MissileLaunchA.mp3']
-});
+}).volume(0.5);
 
 const missileLaunchSoundB = new Howl({
     src: ['static/sound/MissileLaunchB.mp3']
-});
+}).volume(1);
 
 const explosionSoundA = new Howl({
     src: ['static/sound/ExplosionA.mp3']
-});
+}).volume(1);
 
 const explosionSoundB = new Howl({
     src: ['static/sound/ExplosionB.mp3']
-});
+}).volume(1);
 
 const shieldActiveSound = new Howl({
     src: ['static/sound/ShieldActive.mp3']
-});
+}).volume(1);
 
 const playerCrash = new Howl({
     src: ['static/sound/PlayerCrash.mp3']
-});
+}).volume(1);
 
 // Music by <a href="https://pixabay.com/users/music_unlimited-27600023/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280">Music Unlimited</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280">Pixabay</a>
 // Load the background music
 const backgroundMusic = new Howl({
     src: ['static/sound/BackgroundMusic.mp3'],
     loop: true, // Set the loop property to true to make it loop
-});
+}).volume(0.8);
 
 const spaceship = {
     x: 50,
@@ -143,7 +143,7 @@ function updateShield() {
 
     if (shieldActive) {
         // Calculate the energy cost for the elapsed time with efficiency factor
-        const energyCost = (elapsedTime / 1000) * (ShieldEnergyCostPerSecond / shieldCostEfficiency);
+        const energyCost = (elapsedTime / 1000) * ShieldEnergyCostPerSecond * (1 - (shieldCostEfficiency - 1) / 11);
 
         // Check if there's enough energy to sustain the shield
         if (shieldEnergy >= energyCost) {
