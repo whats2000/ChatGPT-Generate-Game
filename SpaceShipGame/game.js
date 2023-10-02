@@ -256,6 +256,7 @@ function createEnemy() {
         speed: 0.5, // Set the speed to 0.5
         health: 5,
         lastMissileBFiredTime: Date.now() + 1500,
+        targetX: canvas.width - 50,
         targetY: spaceship.y
     });
 }
@@ -518,6 +519,11 @@ function updateEnemies() {
             enemy.targetY = Math.random() * (canvas.height - enemy.height);
         }
 
+        if (Math.abs(enemy.x - enemy.targetX) < enemy.speed) {
+            // Generate a new random targetX on the right half of the screen
+            enemy.targetX = canvas.width / 2 + Math.random() * (canvas.width / 2 - enemy.width);
+        }
+
         // Move the enemy towards its target
         if (enemy.y < enemy.targetY) {
             enemy.y += enemy.speed;
@@ -525,11 +531,10 @@ function updateEnemies() {
             enemy.y -= enemy.speed;
         }
 
-        // Check if enemy is out of bounds on the left
-        if (enemy.x + enemy.width > canvas.width - 50) {
-            enemy.x -= enemy.speed;
-        } else {
+        if (enemy.x < enemy.targetX) {
             enemy.x += enemy.speed;
+        } else if (enemy.x > enemy.targetX) {
+            enemy.x -= enemy.speed;
         }
 
         // Check if it's time for the enemy to fire missile B
