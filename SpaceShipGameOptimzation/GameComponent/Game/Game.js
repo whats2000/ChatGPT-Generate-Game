@@ -4,6 +4,10 @@ import Enemy from "../Entity/Enemy.js";
 import GameControl from "./GameControl.js";
 import GameUpgrade from "./GameUpgrade.js";
 
+/**
+ * Enum representing different game states.
+ * @enum {string}
+ */
 const GameState = {
     START: "start",
     PLAYING: "playing",
@@ -11,65 +15,95 @@ const GameState = {
     PAUSED: "paused",
 };
 
+// Create a background music Howl instance.
 const BackgroundMusic = new Howl({
     src: ['static/sound/BackgroundMusic.mp3'],
     loop: true,
 }).volume(0.8);
 
+// Get references to HTML elements by their IDs.
 const instructionsDiv = document.getElementById("instructions");
 const pauseBlock = document.getElementById("pause");
 const gameOverBlock = document.getElementById("gameOver");
 
+/**
+ * Represents the main game class.
+ */
 class Game {
+    /**
+     * Create a Game instance.
+     * @param {HTMLCanvasElement} canvas - The game canvas element.
+     */
     constructor(canvas) {
+        // Store a reference to the canvas and get its 2D rendering context.
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
+        // Create an instance of the GameControl class to manage user input.
         this.gameControl = new GameControl();
 
-        this.player = new SpaceShip(canvas);
-        this.meteorites = [];
-        this.missilesA = [];
-        this.missilesB = [];
-        this.explosions = [];
-        this.enemies = [];
+        // Initialize game objects and variables.
+        this.player = new SpaceShip(canvas); // Create the player's spaceship.
+        this.meteorites = [];                // Initialize an array to store meteorite objects.
+        this.missilesA = [];                 // Initialize an array to store player's missiles.
+        this.missilesB = [];                 // Initialize an array to store enemy missiles.
+        this.explosions = [];                // Initialize an array to store explosion effects.
+        this.enemies = [];                   // Initialize an array to store enemy ships.
 
-        this.lastEnemyCreationTime = 0;
-        this.score = 0;
-        this.baseIntervalA = 2500;
-        this.baseIntervalB = 5000;
-        this.lastCreateMeteoriteTimeA = 0;
-        this.lastCreateMeteoriteTimeB = 0;
+        // Initialize variables related to game timing and scoring.
+        this.lastEnemyCreationTime = 0;      // Track the time of the last enemy creation.
+        this.score = 0;                      // Initialize the player's score.
+        this.baseIntervalA = 2500;           // Base interval for meteorite type A creation.
+        this.baseIntervalB = 5000;           // Base interval for meteorite type B creation.
+        this.lastCreateMeteoriteTimeA = 0;   // Track the time of the last meteorite type A creation.
+        this.lastCreateMeteoriteTimeB = 0;   // Track the time of the last meteorite type B creation.
 
+        // Get references to HTML elements for displaying game information.
         this.scoreboardElement = document.getElementById("scoreboard");
         this.shieldElement = document.getElementById("shield");
 
+        // Set the initial game state to "start."
         this.gameState = GameState.START;
 
+        // Set the canvas dimensions to match the window size.
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
+        // Initialize the upgrade object to manage player upgrades.
         this.upgrade = {};
 
+        // Add upgrade modules for the player's ship and shield.
+        // These modules allow the player to enhance their ship's abilities.
         this.#addUpgradeModule(
-            'fire-rate',
-            this.player,
-            30,
+            'fire-rate',         // Name of the upgrade module (fire rate).
+            this.player,               // Target object for the upgrade (player's ship).
+            30,      // Increment for upgrading the fire rate.
         );
 
         this.#addUpgradeModule(
-            'shield-efficiency',
-            this.player.shield,
-            30
+            'shield-efficiency', // Name of the upgrade module (shield efficiency).
+            this.player.shield,        // Target object for the upgrade (player's shield).
+            30       // Increment for upgrading shield efficiency.
         );
     }
 
+
+    /**
+     * Private method to increase the game score.
+     * @private
+     * @param {number} num - The amount to increase the score by.
+     */
     #increaseScore(num) {
         this.score += num;
         this.scoreboardElement.textContent = "Score: " + this.score;
     }
 
+    /**
+     * Private method to update the positions of missiles.
+     * @private
+     */
     #updateMissiles() {
+        // Update the positions of player's missiles (type A).
         for (let i = 0; i < this.missilesA.length; i++) {
             if (this.missilesA[i].updatePosition()) {
                 this.missilesA.splice(i, 1);
@@ -77,6 +111,7 @@ class Game {
             }
         }
 
+        // Update the positions of enemy missiles (type B).
         for (let i = 0; i < this.missilesB.length; i++) {
             if (this.missilesB[i].updatePosition()) {
                 this.missilesB.splice(i, 1);
@@ -85,22 +120,30 @@ class Game {
         }
     }
 
+    /**
+     * Private method for updating meteorite positions, creation, and interval adjustment.
+     * @private
+     */
     #updateMeteorites() {
+        // Iterate through the meteorites array.
         for (let i = 0; i < this.meteorites.length; i++) {
+            // Check if a meteorite has moved off-screen.
             if (this.meteorites[i].updatePosition()) {
                 this.meteorites.splice(i, 1);
                 i--;
             }
         }
 
-        // Calculate the time elapsed since the last meteorite creation
+        // Calculate the time elapsed since the last creation of meteorite type A.
         const timeElapsedA = Date.now() - this.lastCreateMeteoriteTimeA;
+
+        // Calculate the time elapsed since the last creation of meteorite type B.
         const timeElapsedB = Date.now() - this.lastCreateMeteoriteTimeB;
 
-        // Calculate the number of meteorites based on the player's score
-        const numMeteorites = Math.floor(this.score / 20) + 2; // +1 ensures there's always at least 2 meteorites
+        // Calculate the number of meteorites to create based on the player's score.
+        const numMeteorites = Math.floor(this.score / 20) + 2;
 
-        // Create new meteorites with dynamically adjusted intervals for meteorite A
+        // Create new meteorites of type A with dynamically adjusted intervals.
         if (timeElapsedA >= this.baseIntervalA) {
             for (let j = 0; j < numMeteorites; j++) {
                 this.meteorites.push(new Meteorite("A", this.canvas));
@@ -108,7 +151,7 @@ class Game {
             this.lastCreateMeteoriteTimeA = Date.now();
         }
 
-        // Create new meteorites with dynamically adjusted intervals for meteorite B
+        // Create new meteorites of type B with dynamically adjusted intervals.
         if (timeElapsedB >= this.baseIntervalB) {
             for (let j = 0; j < numMeteorites; j++) {
                 this.meteorites.push(new Meteorite("B", this.canvas));
@@ -117,13 +160,16 @@ class Game {
         }
     }
 
+    /**
+     * Private method for updating enemies positions and creation.
+     * @private
+     */
     #updateEnemies() {
         for (let i = 0; i < this.enemies.length; i++) {
             this.enemies[i].updatePosition();
             this.enemies[i].fire(this.missilesB);
         }
 
-        // Create a new enemy every 10 seconds
         const currentTime = Date.now();
         if (currentTime - this.lastEnemyCreationTime > 10000) {
             this.enemies.push(new Enemy(this.canvas));
@@ -131,22 +177,37 @@ class Game {
         }
     }
 
+    /**
+     * Private method to draw missiles.
+     * @private
+     */
     #drawMissiles() {
+        // Draw player's missiles (type A).
         for (const missileA of this.missilesA) {
             missileA.draw();
         }
 
+        // Draw enemy missiles (type B).
         for (const missileB of this.missilesB) {
             missileB.draw();
         }
     }
 
+    /**
+     * Private method to draw meteorites.
+     * @private
+     */
     #drawMeteorites() {
+        // Draw all meteorites.
         for (const meteorite of this.meteorites) {
             meteorite.draw();
         }
     }
 
+    /**
+     * Private method to draw explosions.
+     * @private
+     */
     #drawExplosions() {
         for (let i = 0; i < this.explosions.length; i++) {
             if (this.explosions[i].isExpired()) {
@@ -155,36 +216,42 @@ class Game {
                 continue;
             }
 
+            // Draw active explosions.
             this.explosions[i].draw();
         }
     }
 
+    /**
+     * Private method to draw enemies.
+     * @private
+     */
     #drawEnemies() {
+        // Draw all enemy entities.
         for (const enemy of this.enemies) {
             enemy.draw();
         }
     }
 
+    /**
+     * Private method to check missile-meteorite collisions.
+     * @private
+     */
     #checkMissileMeteoriteCollisions() {
         for (let i = 0; i < this.meteorites.length; i++) {
             const meteorite = this.meteorites[i];
 
             const missile = this.meteorites[i].checkCollisions(this.missilesA);
-            // Check if a missile collides with a meteorite
+
             if (missile) {
-                // Add the explosion to the explosions array with a timestamp
                 this.meteorites[i].explode(missile, this.explosions);
 
                 this.missilesA.splice(i, 1);
                 this.missilesA.splice(this.missilesA.indexOf(missile), 1);
 
-
-                // If health reaches 0, remove the missile and meteorite
                 if (meteorite.health <= 0) {
                     this.meteorites.splice(i, 1);
                     i--;
 
-                    // Increase the score
                     if (meteorite.type === "B") {
                         this.#increaseScore(3);
                     } else {
@@ -195,40 +262,41 @@ class Game {
         }
     }
 
+    /**
+     * Private method to check missile-enemy collisions.
+     * @private
+     */
     #checkMissileEnemyCollisions() {
         for (let i = 0; i < this.enemies.length; i++) {
             const missile = this.enemies[i].checkCollisions(this.missilesA);
-            // Check if a missile collides with an enemy
+
             if (missile) {
                 this.enemies[i].explode(missile, this.explosions);
                 this.missilesA.splice(this.missilesA.indexOf(missile), 1);
 
-                // If health reaches 0, remove the missile and enemy
                 if (this.enemies[i].health <= 0) {
                     this.enemies.splice(i, 1);
                     i--;
 
-                    // Increase the score (adjust as needed)
-                    this.#increaseScore(5); // You can adjust the score increment
+                    this.#increaseScore(5);
                     this.player.shield.recharge(10);
                 }
             }
         }
     }
 
-    #gameOver() {
-        // Change the game state to "gameOver"
-        this.gameState = GameState.GAME_OVER;
-    }
-
+    /**
+     * Private method to start a new game.
+     * @private
+     */
     #startNewGame() {
-        // Stop any previously playing background music
+        // Stop any previously playing background music.
         BackgroundMusic.stop(undefined, true);
 
-        // Start playing the background music
+        // Start playing the background music.
         BackgroundMusic.play(undefined, true);
 
-        // Reset game variables here
+        // Reset game variables here.
         this.meteorites = [];
         this.missilesA = [];
         this.missilesB = [];
@@ -237,7 +305,7 @@ class Game {
         this.player.y = 50;
         this.player.canFireMissile = true;
 
-        // Reset the base interval
+        // Reset the base interval for meteorite creation.
         this.baseIntervalA = 2500;
         this.baseIntervalB = 5000;
 
@@ -246,19 +314,27 @@ class Game {
         this.lastCreateMeteoriteTimeB = GameStartTime + this.baseIntervalB;
         this.lastEnemyCreationTime = GameStartTime;
 
-        // Reset the score to 0
+        // Reset the score to 0.
         this.score = 0;
 
-        // Reset the Shield Energy to 100
+        // Reset the Shield Energy to 100.
         this.player.shield.energy = 100;
 
-        // Update the scoreboard display
+        // Update the scoreboard display.
         this.scoreboardElement.textContent = "Score: " + this.score;
 
-        // Change the game state to "playing"
+        // Change the game state to "playing."
         this.gameState = GameState.PLAYING;
     }
 
+
+    /**
+     * Adds an upgrade module to the game.
+     * @private
+     * @param {string} name - The name of the upgrade module.
+     * @param {object} target - The target object to upgrade.
+     * @param {number} progressBarIncrement - The increment value for the progress bar.
+     */
     #addUpgradeModule(name, target, progressBarIncrement) {
         this.upgrade[name] = new GameUpgrade(
             this,
@@ -270,43 +346,58 @@ class Game {
         );
     }
 
+    /**
+     * Starts the game loop and handles game state transitions.
+     * @public
+     */
     startPlay() {
-        const gameControl = this.gameControl;
+        const gameControl = this.gameControl.keyStates;
 
         switch (this.gameState) {
             case GameState.PAUSED:
+                // Display pause screen
                 pauseBlock.style.display = "block";
 
+                // Resume the game if Enter key is pressed
                 if (gameControl.isEnterPressed) {
                     this.gameState = GameState.PLAYING;
                 }
                 break;
             case GameState.START:
+                // Hide canvas and show instructions at the start
                 this.canvas.style.display = "none";
                 instructionsDiv.style.display = "block";
                 pauseBlock.style.display = "none";
                 gameOverBlock.style.display = "none";
 
+                // Start the game when Enter key is pressed
                 if (gameControl.isEnterPressed) {
                     BackgroundMusic.play(undefined, true);
                     this.gameState = GameState.PLAYING;
                 }
                 break;
             case GameState.PLAYING:
+                // Toggle player's shield with Shift key
                 if (gameControl.isShiftPressed && !this.player.shield.active) {
                     this.player.shield.toggleShieldOn();
                 }
-                if (!gameControl.isShiftPressed && this.player.shield.active){
+                if (!gameControl.isShiftPressed && this.player.shield.active) {
                     this.player.shield.toggleShieldOff();
                 }
 
+                // Display the game canvas and hide UI elements
                 this.canvas.style.display = "block";
                 instructionsDiv.style.display = "none";
                 pauseBlock.style.display = "none";
                 gameOverBlock.style.display = "none";
 
                 // Game logic when playing
-                this.player.updatePosition(gameControl.isArrowUpPressed, gameControl.isArrowDownPressed, gameControl.isArrowLeftPressed, gameControl.isArrowRightPressed, this.canvas);
+                this.player.updatePosition(
+                    gameControl.isArrowUpPressed,
+                    gameControl.isArrowDownPressed,
+                    gameControl.isArrowLeftPressed,
+                    gameControl.isArrowRightPressed
+                );
                 this.player.fire(gameControl.isSpacePressed, this.missilesA);
                 this.player.shield.updateState();
 
@@ -329,34 +420,38 @@ class Game {
                 this.#checkMissileMeteoriteCollisions();
                 this.#checkMissileEnemyCollisions();
 
+                // Check for player collision with obstacles
                 if (this.player.checkCollisions(this.meteorites, this.missilesB, this.enemies)) {
                     this.player.explode(this.explosions);
-                    this.#gameOver();
-                }
-
-                if (gameControl.isEscapePressed) {
-                    this.#increaseScore(10000);
+                    this.gameState = GameState.GAME_OVER;
+                } else if (gameControl.isEscapePressed) {
+                    // Pause the game if Escape key is pressed
                     this.gameState = GameState.PAUSED;
                 }
                 break;
             case GameState.GAME_OVER:
+                // Display game over screen
                 gameOverBlock.style.display = "block";
                 pauseBlock.style.display = "none";
 
+                // Draw any remaining explosions
                 if (this.explosions.length > 0) {
                     this.#drawExplosions();
                 } else {
+                    // Clear the canvas after explosions
                     setTimeout(() => {
-                        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+                        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                     }, 250);
                 }
 
+                // Restart the game if Enter key is pressed
                 if (gameControl.isEnterPressed) {
                     this.gameState = GameState.PLAYING;
                     this.#startNewGame();
                 }
                 break;
             default:
+                // Start a new game if the default state is encountered
                 this.gameState = GameState.START;
         }
     }

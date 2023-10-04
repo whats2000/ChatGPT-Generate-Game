@@ -2,8 +2,15 @@ import Entity from "./Entity.js";
 import Explosion from "./Explosion.js";
 import Missile from "./Missile.js";
 
-// GameComponent/Enemy.js
+/**
+ * Represents an enemy in the game.
+ * @extends Entity
+ */
 class Enemy extends Entity {
+    /**
+     * Create a new enemy.
+     * @param {HTMLCanvasElement} canvas - The game canvas element.
+     */
     constructor(canvas) {
         super(
             "static/images/SpacePirateShip.png",
@@ -12,16 +19,20 @@ class Enemy extends Entity {
             canvas
         );
 
-        this.speed = 0.5;
-        this.health = 5;
-        this.lastMissileBFiredTime = Date.now() + 1500;
-        this.targetX = canvas.width - 50;
-        this.targetY = Math.random() * (canvas.height - this.height);
+        this.speed = 0.5;                                             // Movement speed of the enemy
+        this.health = 5;                                              // Initial health points
+        this.lastMissileBFiredTime = Date.now() + 1500;               // Cooldown timer for firing missiles
+        this.targetX = canvas.width - 50;                             // Initial target X position
+        this.targetY = Math.random() * (canvas.height - this.height); // Initial target Y position
     }
 
+    /**
+     * Update the enemy's position.
+     */
     updatePosition() {
         // If the enemy has reached its current target, generate a new random target
         if (Math.abs(this.y - this.targetY) < this.speed) {
+            // Generate a new random targetY within canvas
             this.targetY = Math.random() * (this.canvas.height - this.height);
         }
 
@@ -44,6 +55,10 @@ class Enemy extends Entity {
         }
     }
 
+    /**
+     * Fire a missile B.
+     * @param {Missile[]} missiles - The array of missiles to store the fired missile.
+     */
     fire(missiles) {
         // Check if it's time for the enemy to fire missile B
         const currentTime = Date.now();
@@ -59,6 +74,11 @@ class Enemy extends Entity {
         }
     }
 
+    /**
+     * Explode the enemy when hit by a missile A.
+     * @param {Missile} missileA - The missile that hit the enemy.
+     * @param {Explosion[]} explosions - The array of explosions to add the new explosion.
+     */
     explode(missileA, explosions) {
         // Add the explosion to the explosions array with a timestamp
         explosions.push(new Explosion(
@@ -70,6 +90,11 @@ class Enemy extends Entity {
         ));
     }
 
+    /**
+     * Check for collisions with missile A and reduce health if a collision occurs.
+     * @param {Missile[]} missilesA - The array of missile A objects.
+     * @returns {Missile|false} The collided missile or false if no collision occurred.
+     */
     checkCollisions(missilesA) {
         // Check for collisions with enemy missiles B
         for (const missileA of missilesA) {

@@ -9,7 +9,18 @@ const LaunchSound = {
     }).volume(1)
 }
 
+/**
+ * Represents a missile in the game.
+ * @extends Entity
+ */
 class Missile extends Entity {
+    /**
+     * Create a new missile.
+     * @param {string} type - The type of missile (A or B).
+     * @param {number} x - The initial x-coordinate of the missile.
+     * @param {number} y - The initial y-coordinate of the missile.
+     * @param {HTMLCanvasElement} canvas - The game canvas element.
+     */
     constructor(type = "A", x, y, canvas) {
         super(
             type === "A" ? "static/images/MissileA.png" : "static/images/MissileB.png",
@@ -18,14 +29,19 @@ class Missile extends Entity {
             canvas
         );
 
-        this.type = type;
-        this.speed = 5;
+        this.type = type; // Type of missile (A or B)
+        this.speed = 5;   // Speed of the missile
 
+        // Play the launch sound for the missile type, if available
         if (Object.keys(LaunchSound).includes(type)) {
             LaunchSound[type].play(undefined, true);
         }
     }
 
+    /**
+     * Update the position of the missile based on its type.
+     * @returns {boolean} True if the missile is out of bounds and should be removed, false otherwise.
+     */
     updatePosition() {
         this.x += this.type === "A" ? this.speed : -this.speed;
 

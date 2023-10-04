@@ -1,83 +1,66 @@
+/**
+ * Represents a controller for handling game input key states.
+ */
 class GameControl {
     constructor() {
         this.setupEventListeners();
-        this.isArrowUpPressed = false;
-        this.isArrowDownPressed = false;
-        this.isArrowLeftPressed = false;
-        this.isArrowRightPressed = false;
-        this.isSpacePressed = false;
-        this.isEscapePressed = false;
-        this.isShiftPressed = false;
-        this.isEnterPressed = false;
     }
 
+    /**
+     * Set up event listeners to handle key presses and releases.
+     */
     setupEventListeners() {
-        document.addEventListener("keyup", (event) => {
-            this.handleKeyUp(event.key);
-        });
-
-        document.addEventListener("keydown", (event) => {
-            this.handleKeyDown(event.key);
-        });
+        document.addEventListener("keydown", (event) => this.handleKeyEvent(event, true));
+        document.addEventListener("keyup", (event) => this.handleKeyEvent(event, false));
     }
 
-    handleKeyUp(key) {
-        switch (key) {
-            case "ArrowUp":
-                this.isArrowUpPressed = false;
-                break;
-            case "ArrowDown":
-                this.isArrowDownPressed = false;
-                break;
-            case "ArrowLeft":
-                this.isArrowLeftPressed = false;
-                break;
-            case "ArrowRight":
-                this.isArrowRightPressed = false;
-                break;
-            case " ":
-                this.isSpacePressed = false;
-                break;
-            case "Escape":
-                this.isEscapePressed = false;
-                break;
-            case "Shift":
-                this.isShiftPressed = false;
-                break;
-            case "Enter":
-                this.isEnterPressed = false;
-                break;
+    /**
+     * Handle key events and update key states accordingly.
+     * @param {KeyboardEvent} event - The keyboard event.
+     * @param {boolean} isPressed - Indicates if the key is pressed (true) or released (false).
+     */
+    handleKeyEvent(event, isPressed) {
+        const key = this.getKeyName(event);
+
+        if (key) {
+            this.keyStates[key] = isPressed;
         }
     }
 
-    handleKeyDown(key) {
-        switch (key) {
-            case "ArrowUp":
-                this.isArrowUpPressed = true;
-                break;
-            case "ArrowDown":
-                this.isArrowDownPressed = true;
-                break;
-            case "ArrowLeft":
-                this.isArrowLeftPressed = true;
-                break;
-            case "ArrowRight":
-                this.isArrowRightPressed = true;
-                break;
-            case " ":
-                this.isSpacePressed = true;
-                break;
-            case "Escape":
-                this.isEscapePressed = true;
-                break;
-            case "Shift":
-                this.isShiftPressed = true;
-                break;
-            case "Enter":
-                this.isEnterPressed = true;
-                break;
-        }
+    /**
+     * Map a keyboard event to its corresponding key state property.
+     * @param {KeyboardEvent} event - The keyboard event.
+     * @returns {string|null} - The name of the corresponding key state property or null if not mapped.
+     */
+    getKeyName(event) {
+        const keyMap = {
+            ArrowUp: "isArrowUpPressed",
+            ArrowDown: "isArrowDownPressed",
+            ArrowLeft: "isArrowLeftPressed",
+            ArrowRight: "isArrowRightPressed",
+            " ": "isSpacePressed",
+            Escape: "isEscapePressed",
+            Shift: "isShiftPressed",
+            Enter: "isEnterPressed"
+        };
+
+        return keyMap[event.key] || null;
     }
+
+    /**
+     * Default values for key states.
+     * @type {Object}
+     */
+    keyStates = {
+        isArrowUpPressed: false,
+        isArrowDownPressed: false,
+        isArrowLeftPressed: false,
+        isArrowRightPressed: false,
+        isSpacePressed: false,
+        isEscapePressed: false,
+        isShiftPressed: false,
+        isEnterPressed: false
+    };
 }
 
 export default GameControl;
