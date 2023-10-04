@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Space Ship Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.min.js"></script>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<div class="instructions" id="instructions">
+    <h1>Welcome to the Space Shooter Game!</h1>
+    <p>Use <span class="keyboard">'Arrow Keys'</span> to Move the Spaceship</p>
+    <p>Press <span class="keyboard">'Space Bar'</span> to Fire Missiles</p>
+    <p>Press <span class="keyboard">'Shift'</span> to Activate Shield</p>
+    <p>Press <span class="keyboard">'ESC'</span> to Pause The Game</p>
+    <p>Avoid Meteorites and Enemy Ships</p>
+    <h2 class="start-button">Press Enter to Start</h2>
+    <p class="reference">
+        Background image by <a
+            href="https://www.freepik.com/free-photo/ultra-detailed-nebula-abstract-wallpaper-4_39994508.htm#query=space&position=4&from_view=keyword&track=sph"
+            target="_blank" rel="noopener noreferrer">Vaynakh on Freepik</a>
+    </p>
+    <p class="reference">
+        Alien Spaceship by <a href="https://www.nicepng.com/ourpic/u2q8q8r5i1r5o0u2_top-down-spaceship-png-alien-spaceship-top-view/" target="_blank">nicepng.com</a>
+    </p>
+    <p class="reference">
+        Music by <a
+            href="https://pixabay.com/users/music_unlimited-27600023/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280"
+            target="_blank" rel="noopener noreferrer">Music Unlimited</a> from <a
+            href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=120280"
+            target="_blank" rel="noopener noreferrer">Pixabay</a>
+    </p>
+</div>
+
+<div class="instructions" id="pause" style="display: none;">
+    <h1>The game is paused !</h1>
+    <h2 class="start-button">Press Enter to Continue</h2>
+</div>
+
+<div class="instructions" id="gameOver" style="display: none;">
+    <h1>Game Over !</h1>
+    <!-- Upgrade Buttons -->
+    <div class="upgrade">
+        <div class="upgrade-label">Fire Rate:</div>
+        <div class="upgrade-progress">
+            <div class="progress-bar">
+                <div id="fire-rate-progress" class="progress"></div>
+            </div>
+            <button id="fire-rate-button" class="upgrade-button">+</button>
+        </div>
+        <div id="fire-rate-cost" class="upgrade-cost">Cost: 10</div>
+    </div>
+
+    <div class="upgrade">
+        <div class="upgrade-label">Shield Cost:</div>
+        <div class="upgrade-progress">
+            <div class="progress-bar">
+                <div id="shield-efficiency-progress" class="progress"></div>
+            </div>
+            <button id="shield-efficiency-button" class="upgrade-button">+</button>
+        </div>
+        <div id="shield-efficiency-cost" class="upgrade-cost">Cost: 10</div>
+    </div>
+    <h2 class="start-button">Press Enter to Restart</h2>
+</div>
+
+<div id="score-container">
+    <div id="scoreboard">Score: 0</div>
+    <div id="shield">Shield Energy: 100</div>
+</div>
+
+<script type="module" src="Index.js"></script>
+</body>
+</html>
