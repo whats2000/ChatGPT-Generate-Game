@@ -52,7 +52,7 @@ class Game {
         this.upgrade = [];
     }
 
-    increaseScore(num) {
+    #increaseScore(num) {
         this.score += num;
         this.scoreboardElement.textContent = "Score: " + this.score;
     }
@@ -174,9 +174,9 @@ class Game {
 
                     // Increase the score
                     if (meteorite.type === "B") {
-                        this.increaseScore(3);
+                        this.#increaseScore(3);
                     } else {
-                        this.increaseScore(1);
+                        this.#increaseScore(1);
                     }
                 }
             }
@@ -197,7 +197,7 @@ class Game {
                     i--;
 
                     // Increase the score (adjust as needed)
-                    this.increaseScore(5); // You can adjust the score increment
+                    this.#increaseScore(5); // You can adjust the score increment
                     this.player.shield.recharge(10);
                 }
             }
@@ -324,7 +324,7 @@ class Game {
                 }
 
                 if (gameControl.isEscapePressed) {
-                    this.increaseScore(10000);
+                    this.#increaseScore(10000);
                     this.gameState = GameState.PAUSED;
                 }
                 break;
