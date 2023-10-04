@@ -15,8 +15,9 @@ class SpaceShip extends Entity {
 
         this.speed = 5;
         this.canFireMissile = true;
-        this.firePerSecond = 3;
-        this.maxFirePerSecond = 13
+        this.upgrade = 3;
+        this.minUpgrade = 3;
+        this.maxUpgrade = 13;
         this.shield = new Shield(this, canvas);
     }
 
@@ -59,22 +60,7 @@ class SpaceShip extends Entity {
 
         setTimeout(() => {
             this.canFireMissile = true;
-        }, 1000 / this.firePerSecond);
-    }
-
-    upgradeFirePerSecond(score) {
-        // Define the cost to upgrade
-        const upgradeCost = 10 * (this.firePerSecond - 2);
-
-        // Check if the player has enough score and the fire rate is not at the maximum
-        if (score >= upgradeCost && this.firePerSecond < this.maxFirePerSecond) {
-            this.firePerSecond += 1;
-            // Return the cost to be deducted
-            return upgradeCost;
-        }
-
-        // Return false if the upgrade cannot be performed
-        return false;
+        }, 1000 / this.upgrade);
     }
 
     explode(explosions) {

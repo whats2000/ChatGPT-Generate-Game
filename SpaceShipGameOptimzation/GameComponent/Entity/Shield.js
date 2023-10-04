@@ -22,17 +22,18 @@ class Shield extends Entity{
         this.energy = 100; // Initial shield energy
         this.maxEnergy = 100;
         this.costPerSecond = 10; // Energy cost when the shield is active
-        this.efficiency = 1;
-        this.maxShieldEfficiency = 10;
+        this.upgrade = 1;
+        this.minUpgrade = 1;
+        this.maxUpgrade = 11;
         this.lastActivationTime = 0;
         this.lastEnergyRechargeTime = 0;
     }
 
     toggleShieldOn() {
-        if (!this.active) {
-            shieldActiveSound.play(undefined, true);
-        }
-        if (this.energy > this.costPerSecond) {
+        if (this.energy > 3) {
+            if (!this.active) {
+                shieldActiveSound.play(undefined, true);
+            }
             // Activate the shield if there's enough energy
             this.active = true;
             this.lastActivationTime = Date.now();
@@ -59,7 +60,7 @@ class Shield extends Entity{
 
         if (this.active) {
             // Calculate the energy cost for the elapsed time with efficiency factor
-            const energyCost = (elapsedTime / 1000) * this.costPerSecond * (1 - (this.efficiency - 1) / 11);
+            const energyCost = (elapsedTime / 1000) * this.costPerSecond * (1 - (this.upgrade - 1) / 11);
 
             // Check if there's enough energy to sustain the shield
             if (this.energy >= energyCost) {
@@ -77,21 +78,6 @@ class Shield extends Entity{
                 this.lastEnergyRechargeTime = currentTime;
             }
         }
-    }
-
-    upgradeShieldEfficiency(score) {
-        // Define the cost to upgrade
-        const upgradeCost = 10 * this.efficiency;
-
-        // Check if the player has enough score and the fire rate is not at the maximum
-        if (score >= 10 * this.efficiency && this.efficiency <= this.maxShieldEfficiency) {
-            this.efficiency += 1;
-            // Return the cost to be deducted
-            return upgradeCost;
-        }
-
-        // Return false if the upgrade cannot be performed
-        return false;
     }
 
     draw() {

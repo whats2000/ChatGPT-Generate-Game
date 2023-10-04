@@ -31,10 +31,6 @@ class Missile extends Entity {
 
         return (this.type === "A" && this.x > this.canvas.width) || (this.type === "B" && this.x < 0);
     }
-
-    draw() {
-            this.ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-    }
 }
 
 export default Missile;

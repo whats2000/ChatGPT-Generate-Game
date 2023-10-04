@@ -49,7 +49,19 @@ class Game {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
-        this.upgrade = [];
+        this.upgrade = {};
+
+        this.#addUpgradeModule(
+            'fire-rate',
+            this.player,
+            30,
+        );
+
+        this.#addUpgradeModule(
+            'shield-efficiency',
+            this.player.shield,
+            30
+        );
     }
 
     #increaseScore(num) {
@@ -247,16 +259,15 @@ class Game {
         this.gameState = GameState.PLAYING;
     }
 
-    addUpgradeModule(name, maxUpgrade, methodName, progressBarIncrement) {
-        this.upgrade.push(new GameUpgrade(
+    #addUpgradeModule(name, target, progressBarIncrement) {
+        this.upgrade[name] = new GameUpgrade(
             this,
             `${name}-button`,
             `${name}-progress`,
             `${name}-cost`,
-            maxUpgrade,
-            progressBarIncrement,
-            methodName // Pass the method name here
-        ));
+            target,
+            progressBarIncrement
+        );
     }
 
     startPlay() {

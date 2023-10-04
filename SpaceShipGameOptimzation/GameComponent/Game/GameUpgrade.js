@@ -1,12 +1,11 @@
 class GameUpgrade {
-    constructor(game, buttonId, progressBarId, costElementId, maxUpgrade, progressBarIncrement, upgradeFunction) {
+    constructor(game, buttonId, progressBarId, costElementId, target, progressBarIncrement) {
         this.game = game;
         this.button = document.getElementById(buttonId);
         this.progressBar = document.getElementById(progressBarId);
         this.costElement = document.getElementById(costElementId);
-        this.maxUpgrade = maxUpgrade;
+        this.target = target;
         this.progressBarIncrement = progressBarIncrement;
-        this.upgradeFunction = upgradeFunction; // Store the upgrade function
 
         this.button.addEventListener('click', () => {
             this.performUpgrade();
@@ -14,27 +13,29 @@ class GameUpgrade {
     }
 
     performUpgrade() {
-        // Call the specified upgrade function and get the cost
-        const upgradeCost = this.upgradeFunction();
+        // Define the cost to upgrade
+        const upgradeCost = 10 * (this.target.upgrade - this.target.minUpgrade + 1);
 
-        console.log(this.maxUpgrade, upgradeCost)
+        // Check if the player has enough score and the upgrade is not at the maximum
+        if (!(this.game.score >= upgradeCost && this.target.upgrade < this.target.maxUpgrade)) return;
 
-        if (upgradeCost !== false) {
-            // Deduct the cost from the SpaceGame.score
-            this.game.score -= upgradeCost;
+        this.target.upgrade += 1;
 
-            // Update the cost display
-            this.costElement.textContent = upgradeCost < this.maxUpgrade ? `Cost: ${upgradeCost}` : `Max Level`;
+        // Deduct the cost from the SpaceGame.score
+        this.game.score -= upgradeCost;
 
-            // Get the current width of the progress bar
-            const currentWidth = parseFloat(getComputedStyle(this.progressBar).width);
+        // Update the cost display
+        this.costElement.textContent = upgradeCost < (this.target.maxUpgrade - this.target.minUpgrade) * 10 ?
+            `Cost: ${upgradeCost + 10}` : `Max Level`;
 
-            // Update the progress bar width
-            this.progressBar.style.width = `${currentWidth + this.progressBarIncrement}px`;
+        // Get the current width of the progress bar
+        const currentWidth = parseFloat(getComputedStyle(this.progressBar).width);
 
-            // Update the display
-            this.game.scoreboardElement.textContent = "Score: " + this.game.score;
-        }
+        // Update the progress bar width
+        this.progressBar.style.width = `${currentWidth + this.progressBarIncrement}px`;
+
+        // Update the display
+        this.game.scoreboardElement.textContent = "Score: " + this.game.score;
     }
 }
 
