@@ -168,3 +168,44 @@ canvas {
     width: 125px;
     margin-left: 10px;
 }
+
+/* Add this CSS for the warning block */
+.warning-block {
+    position: fixed;
+    top: 40%;
+    left: 0;
+    width: 100%;
+    height: 20%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0; /* Start with 0 opacity */
+    transition: opacity 1s; /* Add a smooth transition effect */
+    z-index: 999; /* Make sure it's above other elements */
+}
+
+.warning-text {
+    color: yellow;
+    font-size: 50px;
+    font-weight: bolder;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* Add animation keyframes for the warning block */
+@keyframes expandWarning {
+    0% {
+        transform: scale(0.2); /* Start small */
+        opacity: 0; /* Start invisible */
+    }
+    50% {
+        transform: scale(1.2); /* Expand to 120% size */
+        opacity: 1; /* Fade in */
+    }
+    100% {
+        transform: scale(1); /* Back to original size */
+        opacity: 0; /* Fade out */
+    }
+}

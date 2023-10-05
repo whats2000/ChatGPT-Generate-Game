@@ -43,10 +43,11 @@ class Shield extends Entity {
 
     /**
      * Activate the shield if there's enough energy.
+     * @param {boolean} [playSound=true] - Whether to play the shield activation sound (default is true).
      */
-    toggleShieldOn() {
+    toggleShieldOn(playSound = true) {
         if (this.energy > 3) {
-            if (!this.active) {
+            if (!this.active && playSound) {
                 shieldActiveSound.play(undefined, true);
             }
             // Activate the shield if there's enough energy

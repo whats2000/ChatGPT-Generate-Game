@@ -1,6 +1,7 @@
 import Entity from "./Entity.js";
 import Explosion from "./Explosion.js";
 import Missile from "./Missile.js";
+import Shield from "./Shield.js";
 
 /**
  * Represents an enemy in the game.
@@ -24,6 +25,7 @@ class Enemy extends Entity {
         this.lastMissileBFiredTime = Date.now() + 1500;               // Cooldown timer for firing missiles
         this.targetX = canvas.width - 50;                             // Initial target X position
         this.targetY = Math.random() * (canvas.height - this.height); // Initial target Y position
+        this.shield = new Shield(this, canvas);                       // Initial Shield
     }
 
     /**
@@ -41,6 +43,13 @@ class Enemy extends Entity {
             this.targetX = this.canvas.width / 2 + Math.random() * (this.canvas.width / 2 - this.width);
         }
 
+        this.moveToTarget();
+    }
+
+    /**
+     * Move the enemy.
+     */
+    moveToTarget() {
         // Move the enemy towards its target
         if (this.y < this.targetY) {
             this.y += this.speed;
@@ -66,7 +75,7 @@ class Enemy extends Entity {
             // Create and push a new missile B
             missiles.push(new Missile(
                 "B",
-                this.x, this.y + this.height / 2 - 7,
+                this.x, this.y + this.height / 2 - 8,
                 this.canvas
             ));
 
@@ -100,7 +109,9 @@ class Enemy extends Entity {
         for (const missileA of missilesA) {
             if (!missileA) continue;
             if (this.isCollideWith(missileA)) {
-                this.health--;
+                if (!this.shield.active) {
+                    this.health--;
+                }
                 return missileA;
             }
         }

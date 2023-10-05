@@ -3,6 +3,7 @@ import Meteorite from "../Entity/Meteorite.js";
 import Enemy from "../Entity/Enemy.js";
 import GameControl from "./GameControl.js";
 import GameUpgrade from "./GameUpgrade.js";
+import EnemyBoss from "../Entity/EnemyBoss.js";
 
 /**
  * Enum representing different game states.
@@ -49,6 +50,7 @@ class Game {
         this.missilesB = [];                 // Initialize an array to store enemy missiles.
         this.explosions = [];                // Initialize an array to store explosion effects.
         this.enemies = [];                   // Initialize an array to store enemy ships.
+        this.boss = new EnemyBoss(canvas);   // Initialize enemy boss ships.
 
         // Initialize variables related to game timing and scoring.
         this.lastEnemyCreationTime = 0;      // Track the time of the last enemy creation.
@@ -57,6 +59,7 @@ class Game {
         this.baseIntervalB = 5000;           // Base interval for meteorite type B creation.
         this.lastCreateMeteoriteTimeA = 0;   // Track the time of the last meteorite type A creation.
         this.lastCreateMeteoriteTimeB = 0;   // Track the time of the last meteorite type B creation.
+        this.lastGeneratedBossScore = 0;     // Track the last score at which a boss was generated.
 
         // Get references to HTML elements for displaying game information.
         this.scoreboardElement = document.getElementById("scoreboard");
@@ -87,6 +90,34 @@ class Game {
         );
     }
 
+
+    /**
+     * Initiates a boss fight in the game.
+     * This method displays a warning message and animation before starting the boss fight.
+     */
+    #startBossFight() {
+        if (this.boss.isInFight) return;
+
+        // Start the boss fight
+        this.boss.isInFight = true;
+
+        // Get the warning block element
+        const warningBlock = document.getElementById("warningBlock");
+
+        // Display the warning block
+        warningBlock.style.display = "flex";
+
+        // Apply the expandWarning animation
+        warningBlock.style.animation = "expandWarning 5s forwards";
+
+        // Set a timeout to hide the warning after the animation
+        setTimeout(() => {
+            // Hide the warning block
+            warningBlock.style.display = "none";
+            // Clear the animation
+            warningBlock.style.animation = "";
+        }, 5000);
+    }
 
     /**
      * Private method to increase the game score.
@@ -141,7 +172,7 @@ class Game {
         const timeElapsedB = Date.now() - this.lastCreateMeteoriteTimeB;
 
         // Calculate the number of meteorites to create based on the player's score.
-        const numMeteorites = Math.floor(this.score / 20) + 2;
+        const numMeteorites = Math.min(Math.floor(this.score / 50) + 2, 6);
 
         // Create new meteorites of type A with dynamically adjusted intervals.
         if (timeElapsedA >= this.baseIntervalA) {
@@ -175,6 +206,18 @@ class Game {
             this.enemies.push(new Enemy(this.canvas));
             this.lastEnemyCreationTime = currentTime;
         }
+    }
+
+    /**
+     * Private method for updating enemy boss position and attacks.
+     * @private
+     */
+    #updateEnemyBoss() {
+        if (!this.boss.isInFight) return;
+
+        this.boss.updatePosition(this.player);
+        this.boss.fire(this.missilesB);
+        this.boss.shield.updateState();
     }
 
     /**
@@ -233,6 +276,17 @@ class Game {
     }
 
     /**
+     * Draws the enemy boss and its shield if it is in the attacking state.
+     * @private
+     */
+    #drawEnemyBoss() {
+        if (!this.boss.isInFight) return;
+        this.boss.draw();
+        this.boss.shield.draw();
+    }
+
+
+    /**
      * Private method to check missile-meteorite collisions.
      * @private
      */
@@ -281,6 +335,31 @@ class Game {
                     this.#increaseScore(5);
                     this.player.shield.recharge(10);
                 }
+            }
+        }
+    }
+
+    /**
+     * Private method to check missile-enemy-boss collisions.
+     * @private
+     */
+    #checkMissileEnemyBossCollisions() {
+        if (!this.boss.isInFight) return;
+
+        const missile = this.boss.checkCollisions(this.missilesA);
+
+        if (missile) {
+            this.boss.explode(missile, this.explosions);
+            this.missilesA.splice(this.missilesA.indexOf(missile), 1);
+
+            if (this.boss.health <= 0) {
+                this.boss.hugeExplosion(this.explosions);
+
+                setTimeout(() => {
+                    this.boss.reset();
+                }, 500)
+
+                this.#increaseScore(30);
             }
         }
     }
@@ -377,6 +456,15 @@ class Game {
                 }
                 break;
             case GameState.PLAYING:
+                // Check if the player's score is greater than or equal to the next boss generation score
+                const nextBossScore = this.lastGeneratedBossScore + 100;
+
+                if (this.score >= nextBossScore) {
+                    // Start the boss fight and update the last generated boss score
+                    this.#startBossFight();
+                    this.lastGeneratedBossScore = nextBossScore;
+                }
+
                 // Toggle player's shield with Shift key
                 if (gameControl.isShiftPressed && !this.player.shield.active) {
                     this.player.shield.toggleShieldOn();
@@ -404,6 +492,7 @@ class Game {
                 this.#updateMissiles();
                 this.#updateMeteorites();
                 this.#updateEnemies();
+                this.#updateEnemyBoss();
 
                 this.shieldElement.textContent = "Shield Energy: " + Math.floor(this.player.shield.energy);
 
@@ -416,9 +505,11 @@ class Game {
                 this.#drawMeteorites();
                 this.#drawExplosions();
                 this.#drawEnemies();
+                this.#drawEnemyBoss();
 
                 this.#checkMissileMeteoriteCollisions();
                 this.#checkMissileEnemyCollisions();
+                this.#checkMissileEnemyBossCollisions();
 
                 // Check for player collision with obstacles
                 if (this.player.checkCollisions(this.meteorites, this.missilesB, this.enemies)) {
