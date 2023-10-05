@@ -122,6 +122,25 @@ class EnemyBoss extends Enemy {
         this.shield.energy = 100;
         this.shield.active = true;
     }
+
+    /**
+     * Resize the canvas to match the window's inner dimensions.
+     * @public
+     */
+    resizeCanvas() {
+        console.log(`resize`)
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.ctx = this.canvas.getContext("2d");
+
+        if (!this.isInFight) {
+            this.x = window.innerWidth + 400;                // Resize X-coordinate off-screen
+            this.y = 0.5 * window.innerHeight;               // Resize Y-coordinate at the center of the canvas
+        }
+
+        this.targetX = window.innerWidth - 350;          // Resize target X position (right side of the canvas)
+        this.targetY = 0.5 * window.innerHeight;         // Resize target Y position (center of the canvas)
+    }
 }
 
 export default EnemyBoss;

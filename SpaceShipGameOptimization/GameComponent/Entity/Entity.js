@@ -53,6 +53,16 @@ class Entity {
             this.height   // Height of the entity.
         );
     }
+
+    /**
+     * Resize the canvas to match the window's inner dimensions.
+     * @public
+     */
+    resizeCanvas() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.ctx = this.canvas.getContext("2d");
+    }
 }
 
 export default Entity;

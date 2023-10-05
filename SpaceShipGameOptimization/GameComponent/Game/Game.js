@@ -88,6 +88,11 @@ class Game {
             this.player.shield,        // Target object for the upgrade (player's shield).
             30       // Increment for upgrading shield efficiency.
         );
+
+        // Resize the canvas when the window is resized.
+        window.addEventListener("resize", () => {
+            this.resizeCanvas();
+        });
     }
 
 
@@ -545,6 +550,23 @@ class Game {
                 // Start a new game if the default state is encountered
                 this.gameState = GameState.START;
         }
+    }
+
+    /**
+     * Resize the canvas to match the window's inner dimensions.
+     * @public
+     */
+    resizeCanvas() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+
+        // Call resizeCanvas for each game object that extends Entity
+        this.player.resizeCanvas();
+        this.meteorites.forEach((meteorite) => meteorite.resizeCanvas());
+        this.missilesA.forEach((missileA) => missileA.resizeCanvas());
+        this.missilesB.forEach((missileB) => missileB.resizeCanvas());
+        this.enemies.forEach((enemy) => enemy.resizeCanvas());
+        this.boss.resizeCanvas();
     }
 }
 
