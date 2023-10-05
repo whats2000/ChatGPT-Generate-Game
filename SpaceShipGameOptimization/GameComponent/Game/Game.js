@@ -388,6 +388,7 @@ class Game {
         this.player.x = 50;
         this.player.y = 50;
         this.player.canFireMissile = true;
+        this.boss.reset();
 
         // Reset the base interval for meteorite creation.
         this.baseIntervalA = 2500;
@@ -397,6 +398,9 @@ class Game {
         this.lastCreateMeteoriteTimeA = GameStartTime + this.baseIntervalA;
         this.lastCreateMeteoriteTimeB = GameStartTime + this.baseIntervalB;
         this.lastEnemyCreationTime = GameStartTime;
+
+        // Reset the generated boss score to 0.
+        this.lastGeneratedBossScore = 0;
 
         // Reset the score to 0.
         this.score = 0;
