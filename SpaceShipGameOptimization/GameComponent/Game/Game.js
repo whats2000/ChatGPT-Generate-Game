@@ -40,9 +40,6 @@ class Game {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-        // Create an instance of the GameControl class to manage user input.
-        this.gameControl = new GameControl();
-
         // Initialize game objects and variables.
         this.player = new SpaceShip(canvas); // Create the player's spaceship.
         this.meteorites = [];                // Initialize an array to store meteorite objects.
@@ -64,6 +61,9 @@ class Game {
         // Get references to HTML elements for displaying game information.
         this.scoreboardElement = document.getElementById("scoreboard");
         this.shieldElement = document.getElementById("shield");
+
+        // Create an instance of the GameControl class to manage user input.
+        this.gameControl = new GameControl();
 
         // Set the initial game state to "start."
         this.gameState = GameState.START;
@@ -470,11 +470,11 @@ class Game {
                     this.lastGeneratedBossScore = nextBossScore;
                 }
 
-                // Toggle player's shield with Shift key
-                if (gameControl.isShiftPressed && !this.player.shield.active) {
+                // Toggle player's shield with Shift key or Left Click
+                if ((gameControl.isShiftPressed || this.gameControl.mouseLeftClick) && !this.player.shield.active) {
                     this.player.shield.toggleShieldOn();
                 }
-                if (!gameControl.isShiftPressed && this.player.shield.active) {
+                if ((!gameControl.isShiftPressed && !this.gameControl.mouseLeftClick) && this.player.shield.active) {
                     this.player.shield.toggleShieldOff();
                 }
 
@@ -485,13 +485,8 @@ class Game {
                 gameOverBlock.style.display = "none";
 
                 // Game logic when playing
-                this.player.updatePosition(
-                    gameControl.isArrowUpPressed,
-                    gameControl.isArrowDownPressed,
-                    gameControl.isArrowLeftPressed,
-                    gameControl.isArrowRightPressed
-                );
-                this.player.fire(gameControl.isSpacePressed, this.missilesA);
+                this.player.updatePosition(this.gameControl);
+                this.player.fire((gameControl.isSpacePressed || this.gameControl.alwaysFire), this.missilesA);
                 this.player.shield.updateState();
 
                 this.#updateMissiles();

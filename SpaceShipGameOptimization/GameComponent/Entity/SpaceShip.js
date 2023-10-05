@@ -29,29 +29,44 @@ class SpaceShip extends Entity {
     }
 
     /**
-     * Update the position of the spaceship based on user input.
-     * @param {boolean} isArrowUpPressed - Whether the "Arrow Up" key is pressed.
-     * @param {boolean} isArrowDownPressed - Whether the "Arrow Down" key is pressed.
-     * @param {boolean} isArrowLeftPressed - Whether the "Arrow Left" key is pressed.
-     * @param {boolean} isArrowRightPressed - Whether the "Arrow Right" key is pressed.
+     * Update the position of the spaceship based on user input or mouse control.
+     * @param {GameControl} gameControl - The game control object handling input.
      */
-    updatePosition(isArrowUpPressed, isArrowDownPressed, isArrowLeftPressed, isArrowRightPressed) {
+    updatePosition(gameControl) {
         let newX = this.x;
         let newY = this.y;
 
-        if (isArrowUpPressed) {
-            newY -= this.speed;
-        }
-        if (isArrowDownPressed) {
-            newY += this.speed;
-        }
-        if (isArrowLeftPressed) {
-            newX -= this.speed;
-        }
-        if (isArrowRightPressed) {
-            newX += this.speed;
+        if (!gameControl.useMouseControl) {
+            // Handle movement based on keyboard input
+            if (gameControl.keyStates.isArrowUpPressed) {
+                newY -= this.speed;
+            }
+            if (gameControl.keyStates.isArrowDownPressed) {
+                newY += this.speed;
+            }
+            if (gameControl.keyStates.isArrowLeftPressed) {
+                newX -= this.speed;
+            }
+            if (gameControl.keyStates.isArrowRightPressed) {
+                newX += this.speed;
+            }
+        } else {
+            // Handle movement based on mouse control
+            const playerCenterX = this.x + this.width / 2;
+            const playerCenterY = this.y + this.height / 2;
+            const deltaX = gameControl.currentMouseX - playerCenterX;
+            const deltaY = gameControl.currentMouseY - playerCenterY;
+
+            // Gradually update the player's position to the mouse location
+            if (deltaX > this.speed || deltaX < -this.speed) {
+                newX += deltaX > 0 ? this.speed : -this.speed;
+            }
+            if (deltaY > this.speed || deltaY < -this.speed) {
+                newY += deltaY > 0 ? this.speed : -this.speed;
+            }
         }
 
+        // Ensure the player stays within the canvas bounds
         if (newX >= 0 && newX + this.width <= this.canvas.width) {
             this.x = newX;
         }
