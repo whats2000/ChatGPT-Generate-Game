@@ -2,9 +2,12 @@ body, html {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    /* <a href="https://www.freepik.com/free-photo/ultra-detailed-nebula-abstract-wallpaper-4_39994508.htm#query=space&position=4&from_view=keyword&track=sph">Image by Vaynakh</a> on Freepik*/
+    width: 100vw;
+    height: 100vh;
     background-image: url("static/images/Background.jpg"); /* Set the background image */
-    background-size: cover; /* Cover the entire viewport */
+    background-size: cover; /* Cover the entire viewport with a fixed-size image */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-position: center; /* Center the image within the viewport */
 }
 
 canvas {
