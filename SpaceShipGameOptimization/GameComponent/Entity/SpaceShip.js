@@ -20,12 +20,12 @@ class SpaceShip extends Entity {
             canvas
         );
 
-        this.speed = 5;                         // Movement speed of the spaceship
-        this.canFireMissile = true;             // Flag to control missile firing rate
-        this.upgrade = 3;                       // Current missile firing rate upgrade level
-        this.minUpgrade = 3;                    // Minimum upgrade level
-        this.maxUpgrade = 13;                   // Maximum upgrade level
-        this.shield = new Shield(this, canvas); // The spaceship's shield
+        this.speed = 5;                          // Movement speed of the spaceship
+        this.lastMissileAFiredTime = Date.now(); // Cooldown timer for firing missiles
+        this.upgrade = 3;                        // Current missile firing rate upgrade level
+        this.minUpgrade = 3;                     // Minimum upgrade level
+        this.maxUpgrade = 13;                    // Maximum upgrade level
+        this.shield = new Shield(this, canvas);  // The spaceship's shield
     }
 
     /**
@@ -81,7 +81,7 @@ class SpaceShip extends Entity {
      * @param {Missile[]} missiles - The array of missiles to store the fired missile.
      */
     fire(isSpacePressed, missiles) {
-        if (!isSpacePressed || !this.canFireMissile) return;
+        if (!isSpacePressed || this.lastMissileAFiredTime + 1000 / this.upgrade > Date.now()) return;
 
         missiles.push(new Missile(
             "A",
@@ -90,11 +90,7 @@ class SpaceShip extends Entity {
             this.canvas
         ));
 
-        this.canFireMissile = false;
-
-        setTimeout(() => {
-            this.canFireMissile = true;
-        }, 1000 / this.upgrade);
+        this.lastMissileAFiredTime = Date.now();
     }
 
     /**

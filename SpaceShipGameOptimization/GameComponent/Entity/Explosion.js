@@ -1,10 +1,10 @@
 const ExplosionSound = {
     "A": new Howl({
         src: ['static/sound/ExplosionA.mp3']
-    }).volume(1),
+    }).volume(0.2),
     "B": new Howl({
         src: ['static/sound/ExplosionB.mp3']
-    }).volume(1),
+    }).volume(0.2),
     "C": new Howl({
         src: ['static/sound/PlayerCrash.mp3']
     }).volume(1)

@@ -24,7 +24,7 @@ class EnemyBoss extends Enemy {
 
         this.speed = 0.35;                               // Boss's movement speed
         this.health = 30;                                // Boss's initial health
-        this.lastMissileBFiredTime = Date.now() + 15000; // Initial missile firing time (15 seconds delay)
+        this.lastMissileBFiredTime = Date.now() + 5000;  // Initial missile firing time (5 seconds delay)
         this.targetX = canvas.width - 350;               // Initial target X position (right side of the canvas)
         this.targetY = 0.5 * canvas.height;              // Initial target Y position (center of the canvas)
 
@@ -32,7 +32,7 @@ class EnemyBoss extends Enemy {
 
         // Initialize the boss's shield and set its upgrade level to 6
         this.shield = new Shield(this, canvas);
-        this.shield.upgrade = 6;
+        this.shield.upgrade = 7;
     }
 
 
@@ -116,10 +116,11 @@ class EnemyBoss extends Enemy {
         // Reset the boss's position, missile firing time, health, shield, and shield energy
         this.x = this.canvas.width + 400;
         this.y = 0.5 * this.canvas.height;
-        this.lastMissileBFiredTime = Date.now() + 10000;
+        this.lastMissileBFiredTime = Date.now() + 5000;
         this.health = 30;
         this.targetX = this.canvas.width - 350;
         this.shield.energy = 100;
+        this.shield.lastActivationTime = Date.now();
         this.shield.active = true;
     }
 

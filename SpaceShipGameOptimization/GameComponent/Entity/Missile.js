@@ -3,10 +3,10 @@ import Entity from "./Entity.js";
 const LaunchSound = {
     "A": new Howl({
         src: ['static/sound/MissileLaunchA.mp3']
-    }).volume(1),
+    }).volume(0.2),
     "B": new Howl({
         src: ['static/sound/MissileLaunchB.mp3']
-    }).volume(1)
+    }).volume(0.5)
 }
 
 /**
