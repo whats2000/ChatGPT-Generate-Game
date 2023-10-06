@@ -78,6 +78,9 @@ class Game {
         // Initialize the upgrade object to manage player upgrades.
         this.upgrade = {};
 
+        // Resize the canvas
+        this.resizeCanvas();
+
         // Add upgrade modules for the player's ship and shield.
         // These modules allow the player to enhance their ship's abilities.
         this.#addUpgradeModule(
@@ -102,6 +105,7 @@ class Game {
     /**
      * Initiates a boss fight in the game.
      * This method displays a warning message and animation before starting the boss fight.
+     * @private
      */
     #startBossFight() {
         if (this.boss.isInFight) return;
@@ -129,8 +133,8 @@ class Game {
 
     /**
      * Private method to increase the game score.
-     * @private
      * @param {number} num - The amount to increase the score by.
+     * @private
      */
     #increaseScore(num) {
         this.score += num;
