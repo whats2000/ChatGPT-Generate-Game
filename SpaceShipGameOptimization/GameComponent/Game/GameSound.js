@@ -24,7 +24,6 @@ class GameSound {
                     currentVolume = targetVolume;
                 }
                 howlInstance.volume(currentVolume);
-                console.log(howlInstance.volume())
             } else {
                 clearInterval(interval);
                 if (targetVolume === 0) {
