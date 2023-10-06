@@ -490,10 +490,8 @@ class Game {
                     if (!gameControl.isShiftPressed && !this.gameControl.mouseLeftClick) {
                         if (this.shieldToggleState) {
                             if (!this.player.shield.active) {
-                                console.log(`On`)
                                 this.player.shield.toggleShieldOn();
                             } else {
-                                console.log(`Off`)
                                 this.player.shield.toggleShieldOff();
                             }
                             this.shieldToggleState = false;
