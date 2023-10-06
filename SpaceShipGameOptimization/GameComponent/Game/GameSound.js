@@ -42,7 +42,7 @@ class GameSound {
      */
     static increaseVolume(howlInstance, duration, targetVolume) {
         let currentVolume = howlInstance.volume();
-        
+
         // Calculate the number of intervals based on duration
         const numIntervals = duration / (1000 / 60);
 

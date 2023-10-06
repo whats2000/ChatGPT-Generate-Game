@@ -482,7 +482,6 @@ class Game {
 
         switch (this.gameState) {
             case GameState.PAUSED:
-                this.#increaseScore(90);
                 // Display pause screen
                 pauseBlock.style.display = "block";
 
