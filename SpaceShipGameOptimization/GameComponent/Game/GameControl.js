@@ -10,6 +10,8 @@ class GameControl {
 
         this.useMouseControl = false; // Indicates whether the game uses mouse control.
         this.alwaysFire = false;      // Indicates whether the player always fires missiles.
+        this.toggleHold = true;       // Initialize the toggle hold setting state as true (or false if you want it initially off).
+
 
         // Initialize mouse state
         this.mouseLeftClick = false;  // Indicates whether the left mouse button is currently clicked.
@@ -29,6 +31,9 @@ class GameControl {
         document.addEventListener("mousemove", (event) => this.handleMouseMove(event));
         document.getElementById("mouse-control-toggle").addEventListener("change", this.toggleMouseControl.bind(this));
         document.getElementById("always-fire-toggle").addEventListener("change", this.toggleAlwaysFire.bind(this));
+        document.getElementById("hold-to-toggle-shield-toggle").addEventListener("change", () => {
+            this.toggleHold = !this.toggleHold; // Toggle the toggle hold setting state
+        });
     }
 
     /**

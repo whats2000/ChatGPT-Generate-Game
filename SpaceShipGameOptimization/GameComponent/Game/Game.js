@@ -65,6 +65,9 @@ class Game {
         // Create an instance of the GameControl class to manage user input.
         this.gameControl = new GameControl();
 
+        // Initialize the shield toggle state as false
+        this.shieldToggleState = false;
+
         // Set the initial game state to "start."
         this.gameState = GameState.START;
 
@@ -474,12 +477,30 @@ class Game {
                     this.lastGeneratedBossScore = nextBossScore;
                 }
 
-                // Toggle player's shield with Shift key or Left Click
-                if ((gameControl.isShiftPressed || this.gameControl.mouseLeftClick) && !this.player.shield.active) {
-                    this.player.shield.toggleShieldOn();
-                }
-                if ((!gameControl.isShiftPressed && !this.gameControl.mouseLeftClick) && this.player.shield.active) {
-                    this.player.shield.toggleShieldOff();
+                if (this.gameControl.toggleHold) {
+                    // Toggle player's shield with Shift key or Left Click
+                    if ((gameControl.isShiftPressed || this.gameControl.mouseLeftClick) && !this.player.shield.active) {
+                        this.player.shield.toggleShieldOn();
+                    }
+                    if ((!gameControl.isShiftPressed && !this.gameControl.mouseLeftClick) && this.player.shield.active) {
+                        this.player.shield.toggleShieldOff();
+                    }
+                } else {
+                    // Change the shield activate state when both Shift key and Left Click are released
+                    if (!gameControl.isShiftPressed && !this.gameControl.mouseLeftClick) {
+                        if (this.shieldToggleState) {
+                            if (!this.player.shield.active) {
+                                console.log(`On`)
+                                this.player.shield.toggleShieldOn();
+                            } else {
+                                console.log(`Off`)
+                                this.player.shield.toggleShieldOff();
+                            }
+                            this.shieldToggleState = false;
+                        }
+                    } else {
+                        this.shieldToggleState = true;
+                    }
                 }
 
                 // Display the game canvas and hide UI elements
