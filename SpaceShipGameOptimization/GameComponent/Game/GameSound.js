@@ -2,27 +2,39 @@
  * A utility class for controlling audio volume with smooth transitions.
  */
 class GameSound extends Howl {
-    // Create a background music Howl instance.
+    /**
+     * Create a background music Howl instance.
+     * @type {GameSound}
+     */
     static BackgroundMusic = new GameSound({
         src: ['static/sound/BackgroundMusic.mp3'],
         loop: true,
         volume: 0.8
     });
 
-    // Create a boss background music Howl instance.
+    /**
+     * Create a boss background music Howl instance.
+     * @type {GameSound}
+     */
     static BossBackgroundMusic = new GameSound({
         src: ['static/sound/BossBackgroundMusic.mp3'],
         loop: true,
         volume: 0
     });
 
-    // Create a warning sound Howl instance.
+    /**
+     * Create a warning sound Howl instance.
+     * @type {GameSound}
+     */
     static WarningSound = new GameSound({
         src: ['static/sound/Warning.mp3'],
         volume: 1
     });
 
-    // Create missiles launch sound
+    /**
+     * Create missiles launch sound.
+     * @type {Object.<string, GameSound>}
+     */
     static LaunchSound = {
         "A": new GameSound({
             src: ['static/sound/MissileLaunchA.mp3'],
@@ -32,9 +44,12 @@ class GameSound extends Howl {
             src: ['static/sound/MissileLaunchB.mp3'],
             volume: 0.5
         })
-    }
+    };
 
-    // Create explosion sound
+    /**
+     * Create explosion sound.
+     * @type {Object.<string, GameSound>}
+     */
     static ExplosionSound = {
         "A": new GameSound({
             src: ['static/sound/ExplosionA.mp3'],
@@ -48,9 +63,12 @@ class GameSound extends Howl {
             src: ['static/sound/PlayerCrash.mp3'],
             volume: 1
         })
-    }
+    };
 
-    // Create a Howl instance for the shield active sound
+    /**
+     * Create a Howl instance for the shield active sound.
+     * @type {GameSound}
+     */
     static shieldActiveSound = new GameSound({
         src: ['static/sound/ShieldActive.mp3'],
         volume: 1
