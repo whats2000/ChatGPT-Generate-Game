@@ -1,14 +1,4 @@
-const ExplosionSound = {
-    "A": new Howl({
-        src: ['static/sound/ExplosionA.mp3']
-    }).volume(0.2),
-    "B": new Howl({
-        src: ['static/sound/ExplosionB.mp3']
-    }).volume(0.2),
-    "C": new Howl({
-        src: ['static/sound/PlayerCrash.mp3']
-    }).volume(1)
-}
+import GameSound from "../Game/GameSound.js";
 
 const explosionImage = new Image();
 explosionImage.src = "static/images/Explosion.png"; // Path to the explosion image
@@ -32,8 +22,8 @@ class Explosion {
         this.ctx = canvas.getContext("2d"); // 2D rendering context of the canvas
 
         // Play the explosion sound if the type is valid
-        if (Object.keys(ExplosionSound).includes(type)) {
-            ExplosionSound[type].play(undefined, true);
+        if (Object.keys(GameSound.ExplosionSound).includes(type)) {
+            GameSound.ExplosionSound[type].play(undefined, true);
         }
     }
 

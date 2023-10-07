@@ -1,9 +1,5 @@
 import Entity from "./Entity.js";
-
-// Create a Howl instance for the shield active sound
-const shieldActiveSound = new Howl({
-    src: ['static/sound/ShieldActive.mp3']
-}).volume(1);
+import GameSound from "../Game/GameSound.js";
 
 /**
  * Represents a shield that can be activated by the player's spaceship.
@@ -48,7 +44,7 @@ class Shield extends Entity {
     toggleShieldOn(playSound = true) {
         if (this.energy > 3) {
             if (!this.active && playSound) {
-                shieldActiveSound.play(undefined, true);
+                GameSound.shieldActiveSound.play(undefined, true);
             }
             // Activate the shield if there's enough energy
             this.active = true;

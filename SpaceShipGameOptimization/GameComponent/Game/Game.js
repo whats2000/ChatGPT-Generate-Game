@@ -17,23 +17,6 @@ const GameState = {
     PAUSED: "paused",
 };
 
-// Create a background music Howl instance.
-const BackgroundMusic = new Howl({
-    src: ['static/sound/BackgroundMusic.mp3'],
-    loop: true,
-}).volume(0.8);
-
-// Create a boss background music Howl instance.
-const BossBackgroundMusic = new Howl({
-    src: ['static/sound/BossBackgroundMusic.mp3'],
-    loop: true,
-}).volume(0.01);
-
-// Create a warning sound Howl instance.
-const WarningSound = new Howl({
-    src: ['static/sound/Warning.mp3']
-}).volume(1);
-
 // Get references to HTML elements by their IDs.
 const instructionsDiv = document.getElementById("instructions");
 const pauseBlock = document.getElementById("pause");
@@ -129,15 +112,15 @@ class Game {
         this.boss.isInFight = true;
 
         // Decrease the volume of BackgroundMusic smoothly
-        GameSound.decreaseVolume(BackgroundMusic, 5000, 0.3);
+        GameSound.BackgroundMusic.decreaseVolume(5000, 0.3);
 
         // Play WarningSound and stop BackgroundMusic
-        WarningSound.play(undefined, true);
+        GameSound.WarningSound.play(undefined, true);
 
         // Play BossBackgroundMusic
-        BossBackgroundMusic.play(undefined, true)
-        BossBackgroundMusic.volume(0.01);
-        GameSound.increaseVolume(BossBackgroundMusic, 5000, 0.8);
+        GameSound.BossBackgroundMusic.play(undefined, true)
+        GameSound.BossBackgroundMusic.volume(0.01);
+        GameSound.BossBackgroundMusic.increaseVolume(5000, 0.8);
 
         // Get the warning block element
         const warningBlock = document.getElementById("warningBlock");
@@ -394,8 +377,8 @@ class Game {
                 this.boss.hugeExplosion(this.explosions);
 
                 // Boss Background Music stop
-                GameSound.decreaseVolume(BossBackgroundMusic, 5000, 0);
-                GameSound.increaseVolume(BackgroundMusic, 5000, 0.8);
+                GameSound.BossBackgroundMusic.decreaseVolume(5000, 0);
+                GameSound.BackgroundMusic.increaseVolume(5000, 0.8);
 
                 setTimeout(() => {
                     this.boss.reset();
@@ -412,12 +395,12 @@ class Game {
      */
     #startNewGame() {
         // Stop any previously playing background music.
-        BackgroundMusic.stop(undefined, true);
-        BossBackgroundMusic.stop(undefined, true);
+        GameSound.BackgroundMusic.stop(undefined, true);
+        GameSound.BossBackgroundMusic.stop(undefined, true);
 
         // Start playing the background music.
-        BackgroundMusic.play(undefined, true);
-        BackgroundMusic.volume(0.8);
+        GameSound.BackgroundMusic.play(undefined, true);
+        GameSound.BackgroundMusic.volume(0.8);
 
         // Reset game variables here.
         this.meteorites = [];
@@ -499,7 +482,7 @@ class Game {
 
                 // Start the game when Enter key is pressed
                 if (gameControl.isEnterPressed) {
-                    BackgroundMusic.play(undefined, true);
+                    GameSound.BackgroundMusic.play(undefined, true);
                     this.gameState = GameState.PLAYING;
                 }
                 break;

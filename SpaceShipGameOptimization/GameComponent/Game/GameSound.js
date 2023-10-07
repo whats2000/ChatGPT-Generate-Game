@@ -1,15 +1,68 @@
 /**
  * A utility class for controlling audio volume with smooth transitions.
  */
-class GameSound {
+class GameSound extends Howl {
+    // Create a background music Howl instance.
+    static BackgroundMusic = new GameSound({
+        src: ['static/sound/BackgroundMusic.mp3'],
+        loop: true,
+        volume: 0.8
+    });
+
+    // Create a boss background music Howl instance.
+    static BossBackgroundMusic = new GameSound({
+        src: ['static/sound/BossBackgroundMusic.mp3'],
+        loop: true,
+        volume: 0
+    });
+
+    // Create a warning sound Howl instance.
+    static WarningSound = new GameSound({
+        src: ['static/sound/Warning.mp3'],
+        volume: 1
+    });
+
+    // Create missiles launch sound
+    static LaunchSound = {
+        "A": new GameSound({
+            src: ['static/sound/MissileLaunchA.mp3'],
+            volume: 0.2
+        }),
+        "B": new GameSound({
+            src: ['static/sound/MissileLaunchB.mp3'],
+            volume: 0.5
+        })
+    }
+
+    // Create explosion sound
+    static ExplosionSound = {
+        "A": new GameSound({
+            src: ['static/sound/ExplosionA.mp3'],
+            volume: 0.2
+        }),
+        "B": new GameSound({
+            src: ['static/sound/ExplosionB.mp3'],
+            volume: 0.2
+        }),
+        "C": new GameSound({
+            src: ['static/sound/PlayerCrash.mp3'],
+            volume: 1
+        })
+    }
+
+    // Create a Howl instance for the shield active sound
+    static shieldActiveSound = new GameSound({
+        src: ['static/sound/ShieldActive.mp3'],
+        volume: 1
+    });
+
     /**
      * Decreases the volume of a Howl instance over a specified duration to a target volume.
-     * @param {Howl} howlInstance - The Howl instance to adjust the volume of.
      * @param {number} duration - The duration of the volume transition in milliseconds.
      * @param {number} targetVolume - The target volume to reach.
      */
-    static decreaseVolume(howlInstance, duration, targetVolume) {
-        let currentVolume = howlInstance.volume();
+    decreaseVolume(duration, targetVolume) {
+        let currentVolume = this.volume();
 
         // Calculate the number of intervals based on duration
         const numIntervals = duration / (1000 / 60);
@@ -23,11 +76,11 @@ class GameSound {
                 if (currentVolume < targetVolume) {
                     currentVolume = targetVolume;
                 }
-                howlInstance.volume(currentVolume);
+                this.volume(currentVolume);
             } else {
                 clearInterval(interval);
                 if (targetVolume === 0) {
-                    howlInstance.stop();
+                    this.stop();
                 }
             }
         }, 1000 / 60); // Update volume approximately 60 times per second for smooth transition
@@ -35,12 +88,11 @@ class GameSound {
 
     /**
      * Increases the volume of a Howl instance over a specified duration to a target volume.
-     * @param {Howl} howlInstance - The Howl instance to adjust the volume of.
      * @param {number} duration - The duration of the volume transition in milliseconds.
      * @param {number} targetVolume - The target volume to reach.
      */
-    static increaseVolume(howlInstance, duration, targetVolume) {
-        let currentVolume = howlInstance.volume();
+    increaseVolume(duration, targetVolume) {
+        let currentVolume = this.volume();
 
         // Calculate the number of intervals based on duration
         const numIntervals = duration / (1000 / 60);
@@ -54,7 +106,7 @@ class GameSound {
                 if (currentVolume > targetVolume) {
                     currentVolume = targetVolume;
                 }
-                howlInstance.volume(currentVolume);
+                this.volume(currentVolume);
             } else {
                 clearInterval(interval);
             }

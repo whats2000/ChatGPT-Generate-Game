@@ -1,13 +1,5 @@
 import Entity from "./Entity.js";
-
-const LaunchSound = {
-    "A": new Howl({
-        src: ['static/sound/MissileLaunchA.mp3']
-    }).volume(0.2),
-    "B": new Howl({
-        src: ['static/sound/MissileLaunchB.mp3']
-    }).volume(0.5)
-}
+import GameSound from "../Game/GameSound.js";
 
 /**
  * Represents a missile in the game.
@@ -33,8 +25,8 @@ class Missile extends Entity {
         this.speed = 5;   // Speed of the missile
 
         // Play the launch sound for the missile type, if available
-        if (Object.keys(LaunchSound).includes(type)) {
-            LaunchSound[type].play(undefined, true);
+        if (Object.keys(GameSound.LaunchSound).includes(type)) {
+            GameSound.LaunchSound[type].play(undefined, true);
         }
     }
 
