@@ -1,5 +1,6 @@
 /**
  * A utility class for controlling audio volume with smooth transitions.
+ * @extends {Howl}
  */
 class GameSound extends Howl {
     /**
@@ -129,6 +130,32 @@ class GameSound extends Howl {
                 clearInterval(interval);
             }
         }, 1000 / 60); // Update volume approximately 60 times per second for smooth transition
+    }
+
+    /**
+     * Play a sound or resume previous playback.
+     * @param  {string/number} sprite   Sprite name for sprite playback or sound id to continue previous.
+     * @param  {boolean} internal Internal Use: true prevents event firing.
+     * @return {number}          Sound ID.
+     */
+    play(sprite, internal) {
+        super.play(sprite, internal);
+    }
+
+    /**
+     * Get/set the global volume for all sounds.
+     * @param {number|undefined} vol - Optional. Volume from 0.0 to 1.0. If provided and within the valid range,
+     * it sets the volume. If `undefined`, it returns the current volume.
+     * @returns {Howler|number} - If `vol` is `undefined`, returns the current volume. Otherwise, returns the Howler instance
+     * for chaining methods.
+     */
+    volume(vol) {
+        if (typeof vol === 'number' && vol >= 0 && vol <= 1.0) {
+            // Volume is within the valid range, set it
+            super.volume(vol);
+        }
+        // Return the current volume even if it's out of range or not a number
+        return super.volume();
     }
 }
 
