@@ -119,7 +119,7 @@ class Game {
 
         // Play BossBackgroundMusic
         GameSound.BossBackgroundMusic.play(undefined, true)
-        GameSound.BossBackgroundMusic.volume(0.01);
+        GameSound.BossBackgroundMusic.setVolume(0.01);
         GameSound.BossBackgroundMusic.increaseVolume(5000, 0.8);
 
         // Get the warning block element
@@ -377,7 +377,7 @@ class Game {
                 this.boss.hugeExplosion(this.explosions);
 
                 // Boss Background Music stop
-                GameSound.BossBackgroundMusic.decreaseVolume(5000, 0);
+                GameSound.BossBackgroundMusic.decreaseVolume(5000, 0.01);
                 GameSound.BackgroundMusic.increaseVolume(5000, 0.8);
 
                 setTimeout(() => {
@@ -400,7 +400,7 @@ class Game {
 
         // Start playing the background music.
         GameSound.BackgroundMusic.play(undefined, true);
-        GameSound.BackgroundMusic.volume(0.8);
+        GameSound.BackgroundMusic.setVolume(0.8);
 
         // Reset game variables here.
         this.meteorites = [];
