@@ -43,6 +43,23 @@
 
 <div class="instructions" id="pause" style="display: none;">
     <h1>The game is paused !</h1>
+    <!-- Volume Control Section -->
+    <div class="volume-control">
+        <div class="volume-label">
+            <p>Background Music Volume:</p>
+        </div>
+        <div class="mute-button">
+            <button class="volume-button" id="background-music-mute-button">
+                <span class="volume-icon" id="background-music-volume-icon">🔊</span>
+            </button>
+        </div>
+        <div class="volume-slider">
+            <label for="background-music-slider"></label>
+            <input type="range" class="volume-slider-input" id="background-music-slider" min="0" max="1" step="0.01" value="0.8">
+        </div>
+    </div>
+
+    <!-- Other Settings (Mouse Control, Always Toggle Fire, Hold To Toggle Shield) -->
     <div class="vertical-switch">
         <p>Use Mouse Control</p>
         <label class="switch">

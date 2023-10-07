@@ -289,3 +289,84 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
+/* Styles for the volume control section */
+.volume-control {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.volume-label {
+    font-size: 24px;
+    vertical-align: middle;
+    line-height: 34px;
+    margin: 0;
+}
+
+.mute-button {
+    margin-left: 20px;
+}
+
+.volume-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.volume-icon {
+    vertical-align: middle;
+}
+
+.volume-slider {
+    flex-grow: 1;
+    margin-left: 20px;
+}
+
+/* Style for the volume slider */
+.volume-slider-input {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: #ccc;
+    outline: none;
+}
+
+.volume-slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2196F3;
+    cursor: pointer;
+    transform: translateY(-7px);
+}
+
+.volume-slider-input::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2196F3;
+    cursor: pointer;
+    transform: translateY(-7px);
+}
+
+/* Style for the slider track */
+.volume-slider-input::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.volume-slider-input::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: #ccc;
+    border-radius: 3px;
+}

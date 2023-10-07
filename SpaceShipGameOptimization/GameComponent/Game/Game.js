@@ -79,16 +79,18 @@ class Game {
         // Add upgrade modules for the player's ship and shield.
         // These modules allow the player to enhance their ship's abilities.
         this.#addUpgradeModule(
-            'fire-rate',         // Name of the upgrade module (fire rate).
-            this.player,               // Target object for the upgrade (player's ship).
-            30,      // Increment for upgrading the fire rate.
+            'fire-rate',          // Name of the upgrade module (fire rate).
+            this.player,                // Target object for the upgrade (player's ship).
+            30,       // Increment for upgrading the fire rate.
         );
 
         this.#addUpgradeModule(
-            'shield-efficiency', // Name of the upgrade module (shield efficiency).
-            this.player.shield,        // Target object for the upgrade (player's shield).
-            30       // Increment for upgrading shield efficiency.
+            'shield-efficiency',  // Name of the upgrade module (shield efficiency).
+            this.player.shield,         // Target object for the upgrade (player's shield).
+            30        // Increment for upgrading shield efficiency.
         );
+
+        GameSound.setUpVolumeControl(); // Initialize volume setting binding.
 
         // Resize the canvas when the window is resized.
         window.addEventListener("resize", () => {
@@ -112,7 +114,7 @@ class Game {
         this.boss.isInFight = true;
 
         // Decrease the volume of BackgroundMusic smoothly
-        GameSound.BackgroundMusic.decreaseVolume(5000, 0.3);
+        GameSound.BackgroundMusic.decreaseVolume(5000, GameSound.BackgroundMusic.playerSetVolume * 3 / 8);
 
         // Play WarningSound and stop BackgroundMusic
         GameSound.WarningSound.play(undefined, true);
@@ -120,7 +122,7 @@ class Game {
         // Play BossBackgroundMusic
         GameSound.BossBackgroundMusic.play(undefined, true)
         GameSound.BossBackgroundMusic.setVolume(0.01);
-        GameSound.BossBackgroundMusic.increaseVolume(5000, 0.8);
+        GameSound.BossBackgroundMusic.increaseVolume(5000, GameSound.BackgroundMusic.playerSetVolume);
 
         // Get the warning block element
         const warningBlock = document.getElementById("warningBlock");
@@ -378,7 +380,7 @@ class Game {
 
                 // Boss Background Music stop
                 GameSound.BossBackgroundMusic.decreaseVolume(5000, 0.01);
-                GameSound.BackgroundMusic.increaseVolume(5000, 0.8);
+                GameSound.BackgroundMusic.increaseVolume(5000, GameSound.BackgroundMusic.playerSetVolume);
 
                 setTimeout(() => {
                     this.boss.reset();
@@ -400,7 +402,7 @@ class Game {
 
         // Start playing the background music.
         GameSound.BackgroundMusic.play(undefined, true);
-        GameSound.BackgroundMusic.setVolume(0.8);
+        GameSound.BackgroundMusic.setVolume(GameSound.BackgroundMusic.playerSetVolume);
 
         // Reset game variables here.
         this.meteorites = [];

@@ -3,6 +3,11 @@
  * @extends {Howl}
  */
 class GameSound extends Howl {
+    constructor(option) {
+        super(option);
+
+        this.playerSetVolume = option.playerSetVolume;
+    }
     /**
      * Create a background music Howl instance.
      * @type {GameSound}
@@ -10,7 +15,8 @@ class GameSound extends Howl {
     static BackgroundMusic = new GameSound({
         src: ['static/sound/BackgroundMusic.mp3'],
         loop: true,
-        volume: 0.8
+        volume: 0.8,
+        playerSetVolume: 0.8
     });
 
     /**
@@ -20,7 +26,8 @@ class GameSound extends Howl {
     static BossBackgroundMusic = new GameSound({
         src: ['static/sound/BossBackgroundMusic.mp3'],
         loop: true,
-        volume: 0
+        volume: 0,
+        playerSetVolume: 0.8
     });
 
     /**
@@ -29,7 +36,8 @@ class GameSound extends Howl {
      */
     static WarningSound = new GameSound({
         src: ['static/sound/Warning.mp3'],
-        volume: 1
+        volume: 1,
+        playerSetVolume: 1
     });
 
     /**
@@ -39,11 +47,13 @@ class GameSound extends Howl {
     static LaunchSound = {
         "A": new GameSound({
             src: ['static/sound/MissileLaunchA.mp3'],
-            volume: 0.2
+            volume: 0.2,
+            playerSetVolume: 0.2
         }),
         "B": new GameSound({
             src: ['static/sound/MissileLaunchB.mp3'],
-            volume: 0.5
+            volume: 0.5,
+            playerSetVolume: 0.5
         })
     };
 
@@ -54,15 +64,18 @@ class GameSound extends Howl {
     static ExplosionSound = {
         "A": new GameSound({
             src: ['static/sound/ExplosionA.mp3'],
-            volume: 0.2
+            volume: 0.2,
+            playerSetVolume: 0.2
         }),
         "B": new GameSound({
             src: ['static/sound/ExplosionB.mp3'],
-            volume: 0.2
+            volume: 0.2,
+            playerSetVolume: 0.2
         }),
         "C": new GameSound({
             src: ['static/sound/PlayerCrash.mp3'],
-            volume: 1
+            volume: 1,
+            playerSetVolume: 1
         })
     };
 
@@ -72,8 +85,17 @@ class GameSound extends Howl {
      */
     static shieldActiveSound = new GameSound({
         src: ['static/sound/ShieldActive.mp3'],
-        volume: 1
+        volume: 1,
+        playerSetVolume: 1
     });
+
+    static setUpVolumeControl() {
+        // Get the volume slider element by its ID
+        const backgroundMusicVolumeSlider = document.getElementById('background-music-slider');
+
+        // Bind the volume slider to control the master volume
+        GameSound.BackgroundMusic.#bindVolumeControl(backgroundMusicVolumeSlider);
+    }
 
     /**
      * Decreases the volume of a Howl instance over a specified duration to a target volume.
@@ -169,6 +191,20 @@ class GameSound extends Howl {
         }
         // Return the Howler instance for chaining
         return this;
+    }
+
+    /**
+     * Bind an input element to control the volume.
+     * @param {HTMLInputElement} inputElement - The input element (range slider) to bind.
+     * @private
+     */
+    #bindVolumeControl(inputElement) {
+        // Add an event listener to the input element to update the volume when it changes
+        inputElement.addEventListener('input', (event) => {
+            if (this.getVolume() === this.playerSetVolume)
+                this.setVolume(parseFloat(event.target.value));
+            this.playerSetVolume = parseFloat(event.target.value);
+        });
     }
 }
 
