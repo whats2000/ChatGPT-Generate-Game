@@ -197,7 +197,7 @@ class GameSound extends Howl {
     /**
      * Set the global volume for all sounds.
      * @param {number} vol - Volume from 0.0 to 1.0.
-     * @returns {Howler} - The Howler instance for chaining methods.
+     * @returns {GameSound} - The Howler instance for chaining methods.
      */
     setVolume(vol) {
         if (typeof vol === 'number' && vol >= 0 && vol <= 1.0) {
