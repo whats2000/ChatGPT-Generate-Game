@@ -289,25 +289,42 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
+/* Styles for the volume controls container */
+.volume-controls {
+    display: grid;
+    gap: 0; /* Adjust the gap between controls as needed */
+}
+
 /* Styles for the volume control section */
 .volume-control {
     display: flex;
     align-items: center;
     margin-top: 20px;
+    height: 26px;
 }
 
 .volume-label {
+    flex: 50%;
     font-size: 24px;
-    vertical-align: middle;
+    text-align: start;
     line-height: 34px;
     margin: 0;
 }
 
+.volume-label p {
+    font-size: 18px;
+    vertical-align: middle;
+    line-height: 26px;
+    margin: 0 auto 0 0;
+}
+
 .mute-button {
+    padding: 0;
     margin-left: 20px;
 }
 
 .volume-button {
+    padding: 0;
     background: none;
     border: none;
     cursor: pointer;
