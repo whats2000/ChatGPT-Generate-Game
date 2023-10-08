@@ -44,7 +44,7 @@ class Shield extends Entity {
     toggleShieldOn(playSound = true) {
         if (this.energy > 3) {
             if (!this.active && playSound) {
-                GameSound.shieldActiveSound.play(undefined, true);
+                GameSound.ShieldActiveSound.play(undefined, true);
             }
             // Activate the shield if there's enough energy
             this.active = true;
