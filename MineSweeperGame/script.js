@@ -216,7 +216,7 @@ class Minesweeper {
             tableCell.className = 'dark-gray';
         }
     }
-    
+
     /**
      * Handle the simultaneous left and right click on a cell.
      * @private
