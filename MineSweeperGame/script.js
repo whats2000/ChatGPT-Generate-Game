@@ -9,6 +9,10 @@ class Minesweeper {
      * @param {number} mines - Number of mines in the board.
      */
     constructor(rows, cols, mines) {
+        /** @private {boolean} */
+        this.leftMouseDown = false;
+        /** @private {boolean} */
+        this.rightMouseDown = false;
         /** @private {number} */
         this.rows = rows; // Number of rows
         /** @private {number} */
@@ -90,13 +94,24 @@ class Minesweeper {
                     e.preventDefault();
                     this.handleRightClick(i, j, tableCell);
                 });
-                // Add middle-click event
+
                 tableCell.addEventListener('mousedown', (e) => {
-                    if (e.button === 1) {  // Middle click
-                        e.preventDefault();
-                        this.handleMiddleClick(i, j);
+                    if (e.button === 0) {  // Left click
+                        this.leftMouseDown = true;
+                    } else if (e.button === 2) {  // Right click
+                        this.rightMouseDown = true;
+                    }
+
+                    if (this.leftMouseDown && this.rightMouseDown) {
+                        this.handleBothButtonsClick(i, j);
                     }
                 });
+
+                tableCell.addEventListener('mouseup', () => {
+                    this.leftMouseDown = false;
+                    this.rightMouseDown = false;
+                });
+
                 tableRow.appendChild(tableCell);
             }
             this.table.appendChild(tableRow);
@@ -201,14 +216,14 @@ class Minesweeper {
             tableCell.className = 'dark-gray';
         }
     }
-
+    
     /**
-     * Handle the middle-click event on a cell.
+     * Handle the simultaneous left and right click on a cell.
      * @private
      * @param {number} x - The row index of the clicked cell.
      * @param {number} y - The column index of the clicked cell.
      */
-    handleMiddleClick(x, y) {
+    handleBothButtonsClick(x, y) {
         const tableRow = this.table.rows[x];
         const tableCell = tableRow.cells[y];
 
