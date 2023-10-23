@@ -146,7 +146,7 @@ class Minesweeper {
         const tableCell = tableRow.cells[y];
 
         // Skip if the cell is flagged.
-        if (tableCell.className === 'red') return;
+        if (tableCell.className === 'flag-mine') return;
 
         // If it's a bomb, end the game.
         if (this.board[x][y] === 2) {
@@ -222,8 +222,8 @@ class Minesweeper {
         }
 
         if (tableCell.className === 'dark-gray') {
-            tableCell.className = 'red';
-        } else if (tableCell.className === 'red') {
+            tableCell.className = 'flag-mine';
+        } else if (tableCell.className === 'flag-mine') {
             tableCell.className = 'dark-gray';
         }
     }
@@ -245,7 +245,7 @@ class Minesweeper {
                 const newX = x + dx, newY = y + dy;
                 if (newX >= 0 && newX < this.rows && newY >= 0 && newY < this.cols) {
                     const adjacentCell = this.table.rows[newX].cells[newY];
-                    if (adjacentCell.className === 'red') {
+                    if (adjacentCell.className === 'flag-mine') {
                         flagCount++;
                     }
                 }
@@ -259,7 +259,7 @@ class Minesweeper {
                     const newX = x + dx, newY = y + dy;
                     if (newX >= 0 && newX < this.rows && newY >= 0 && newY < this.cols) {
                         const adjacentCell = this.table.rows[newX].cells[newY];
-                        if (adjacentCell.className !== 'red') {  // Skip flagged cells
+                        if (adjacentCell.className !== 'flag-mine') {  // Skip flagged cells
                             this.handleLeftClick(newX, newY);
                         }
 

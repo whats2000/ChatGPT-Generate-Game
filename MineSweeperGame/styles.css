@@ -47,8 +47,8 @@ td {
     background-color: darkgray;
 }
 
-.red {
-    background-color: red;
+.flag-mine {
+    background: url("static/images/DALL_E_2023-10-23_23.47.57_ - Flag.png") center / cover no-repeat, darkgray;
 }
 
 .yellow {
