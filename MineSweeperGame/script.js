@@ -18,7 +18,7 @@ class Minesweeper {
         /** @private {number} */
         this.cols = cols; // Number of columns
         /** @private {number} */
-        this.mines = mines; // Number of mines
+        this.mines = Math.min(mines, 255); // Number of mines
         /** @private {boolean} */
         this.gameOver = false;  // Flag to track if the game is over
         /** @private {boolean} */
@@ -28,7 +28,7 @@ class Minesweeper {
         // Initialize count of revealed squares
         /** @private {number} */
         this.revealedCount = 0;
-        /** @private {HTMLElement} */
+        /** @private {HTMLTableElement} */
         this.table = document.getElementById('board'); // HTML table element for the board
 
         this.renderBoard();
@@ -252,7 +252,7 @@ class Minesweeper {
     }
 
     /**
-     * Handle the simultaneous left and right click on a cell.
+     * Handle the simultaneous left and right-click on a cell.
      * @private
      * @param {number} x - The row index of the clicked cell.
      * @param {number} y - The column index of the clicked cell.
