@@ -5,7 +5,22 @@ body {
     align-items: center;
     height: 100vh;  /* 100% of the viewport height */
     margin: 0;  /* Remove default margin */
-    background-color: #f0f0f0;  /* Optional: Set a background color */
+    background-image: url("static/images/DALL·E 2023-10-23 17.36.07 - Background.png");
+    background-size: cover;  /* Cover the entire viewport */
+    background-repeat: no-repeat;  /* Do not repeat the image */
+    background-position: center;  /* Center the image */
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);  /* Black with 50% transparency */
+    z-index: -1;  /* Place it below the content */
 }
 
 table {
