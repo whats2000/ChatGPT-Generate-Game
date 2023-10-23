@@ -51,8 +51,16 @@ td {
     background: url("static/images/DALL_E_2023-10-23_23.47.57_ - Flag.png") center / cover no-repeat, darkgray;
 }
 
-.yellow {
-    background-color: yellow;
+.flag-wrong {
+    background: url("static/images/DALL_E_2023-10-23_23.47.57_ - Flag.png") center / cover no-repeat, red;
+}
+
+.mine {
+    background: url("static/images/DALL_E_2023-10-23_23.59.52 - Mine.png") center / cover no-repeat, darkgray;
+}
+
+.explode {
+    background: url("static/images/DALL_E_2023-10-23_23.59.52 - Mine.png") center / cover no-repeat, yellow;
 }
 
 .dark-gray {

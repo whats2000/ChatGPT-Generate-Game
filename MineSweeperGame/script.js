@@ -124,6 +124,28 @@ class Minesweeper {
     }
 
     /**
+     * Reveal all mines on the board when the game is over, and mark incorrect flags.
+     * @private
+     */
+    revealAllMines() {
+        for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+                const tableRow = this.table.rows[i];
+                const tableCell = tableRow.cells[j];
+                if (this.board[i][j] === 2) {
+                    // If the cell is not flagged, reveal it as a mine
+                    if (tableCell.className !== 'flag-mine') {
+                        tableCell.className = 'mine';
+                    }
+                } else if (tableCell.className === 'flag-mine') {
+                    // If the cell is incorrectly flagged, mark it
+                    tableCell.className = 'flag-wrong';
+                }
+            }
+        }
+    }
+
+    /**
      * Handle the left-click event on a cell.
      * @private
      * @param {number} x - The row index of the clicked cell.
@@ -150,7 +172,8 @@ class Minesweeper {
 
         // If it's a bomb, end the game.
         if (this.board[x][y] === 2) {
-            tableCell.className = 'yellow';
+            this.revealAllMines();  // Reveal all mines
+            tableCell.className = 'explode';
             this.showModal('Game Over');  // Show modal
             this.gameOver = true;  // Set game-over flag
             return;
