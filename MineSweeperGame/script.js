@@ -21,6 +21,8 @@ class Minesweeper {
         this.mines = mines; // Number of mines
         /** @private {boolean} */
         this.gameOver = false;  // Flag to track if the game is over
+        /** @private {boolean} */
+        this.minesPlaced = false;  // Flag to indicate whether mines have been placed
         /** @private {Array<Array<number>>} */
         this.board = []; // The game board
         // Initialize count of revealed squares
@@ -29,7 +31,6 @@ class Minesweeper {
         /** @private {HTMLElement} */
         this.table = document.getElementById('board'); // HTML table element for the board
 
-        this.initBoard();
         this.renderBoard();
     }
 
@@ -48,16 +49,20 @@ class Minesweeper {
         // Reset game-over flag
         this.gameOver = false;
 
-        // Initialize new board and render it
-        this.initBoard();
+        // Reset mines placed flag
+        this.minesPlaced = false;
+
+        // Just render the empty board
         this.renderBoard();
     }
 
     /**
      * Initialize the game board with zeros and place mines randomly.
      * @private
+     * @param {number} firstClickX - The x-coordinate of the first clicked square.
+     * @param {number} firstClickY - The y-coordinate of the first clicked square.
      */
-    initBoard() {
+    initBoard(firstClickX, firstClickY) {
         // Initialize board with zeros
         for (let i = 0; i < this.rows; i++) {
             const row = [];
@@ -72,7 +77,7 @@ class Minesweeper {
         while (placedMines < this.mines) {
             const x = Math.floor(Math.random() * this.rows);
             const y = Math.floor(Math.random() * this.cols);
-            if (this.board[x][y] === 0) {
+            if (this.board[x][y] === 0 && (x !== firstClickX || y !== firstClickY)) {
                 this.board[x][y] = 2;
                 placedMines++;
             }
@@ -125,6 +130,12 @@ class Minesweeper {
      * @param {number} y - The column index of the clicked cell.
      */
     handleLeftClick(x, y) {
+        // If mines haven't been placed yet, initialize the board now
+        if (!this.minesPlaced) {
+            this.initBoard(x, y);
+            this.minesPlaced = true;  // Set the flag to true
+        }
+
         // If the game is over, reset it before doing anything else
         if (this.gameOver) {
             this.resetGame();
